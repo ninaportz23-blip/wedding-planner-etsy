@@ -249,7 +249,7 @@ PAGES.append(p)
 # PAGE 3 - Guests + Seating
 # =====================================================================
 p = Page("Guest List and Seating Plan")
-p.script_title("Never Lose Track Of", "Guests &amp; Seating", title_size=68, top=64)
+p.script_title("Never Lose Track Of", "Guests & Seating", title_size=68, top=64)
 p.subtitle("GUEST LIST + SEATING PLAN", top=210)
 gbox = (170, 290, 1030, 290 + 860 / 1.6)
 p.laptop("guest-list.png", gbox)
@@ -274,13 +274,13 @@ PAGES.append(p)
 # =====================================================================
 p = Page("Venue Comparison and Food and Drinks")
 p.script_title("Venues And Vendors", "Compared Clearly", title_size=70, top=64)
-p.subtitle("VENUE COMPARISON + FOOD &amp; DRINKS", top=210)
+p.subtitle("VENUE COMPARISON + FOOD & DRINKS", top=210)
 vebox = (170, 290, 1030, 290 + 860 / 1.6)
 p.laptop("venue-comparison.png", vebox)
 p.pill("VENUE COMPARISON", 300, vebox[1] - 30, LAVENDER, 20)
 fbox = (520, vebox[3] + 70, 520 + 520, vebox[3] + 70 + 520 / 1.38)
 p.tablet("food-drinks.png", fbox)
-p.pill("FOOD &amp; DRINKS", fbox[0] + 90, fbox[1] - 28, PEACH, 18)
+p.pill("FOOD & DRINKS", fbox[0] + 90, fbox[1] - 28, PEACH, 18)
 p.callout("**Compare up to 5 venues** side by side on fees and capacity", (60, vebox[1] + 55), (vebox[0] + 60, vebox[1] + 150), "left")
 p.callout("**Best value pick** flagged automatically once costs are in", (1060, vebox[1] + 55), (vebox[0] + 650, vebox[1] + 260), "right")
 p.badge("5 Venues\nSide By Side", 110, vebox[3] - 40, 58, LAVENDER, CHARCOAL, 15)
@@ -363,7 +363,7 @@ p.subtitle("MOODBOARD + DECOR + FLOWERS + ATTIRE", top=200)
 items7 = [("moodboard.png", "Moodboard", "Pin every inspiration image in one place", BLUSH),
           ("decor.png", "Decor Inventory", "Track cost and status for every rented piece", SAGE),
           ("flowers.png", "Flower Arrangements", "Every bouquet and centerpiece, costed out", PEACH),
-          ("attire-makeup.png", "Attire &amp; Makeup", "Looks organized by event and by person", LAVENDER)]
+          ("attire-makeup.png", "Attire & Makeup", "Looks organized by event and by person", LAVENDER)]
 gap7, x07 = 40, 80
 fw7 = (1200 - 2 * 80 - gap7) / 2
 fh7 = fw7 / 1.35
