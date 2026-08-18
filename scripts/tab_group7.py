@@ -209,6 +209,7 @@ def build_gifts_thank_you(wb, dv_named):
                 value=f'=IFERROR(COUNTIF(D{first}:D{last},ChkVal)&" / "&COUNTA(A{first}:A{last}),"0 / 0")')
     v.font = f_kpi_number(size=15)
 
-    freeze_header(ws, header_row)
+    # Long gift log: keep the column headers visible while scrolling.
+    ws.freeze_panes = ws.cell(row=first, column=1)
     set_col_widths(ws, {"A": 20, "B": 22, "C": 14, "D": 16, "E": 14, "F": 26})
     return {"first": first, "last": last}

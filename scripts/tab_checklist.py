@@ -103,7 +103,8 @@ def build_checklist(wb, dv_named):
         f"B{first_data_row}:B{last_data_row}",
         FormulaRule(formula=[f'A{first_data_row}=ChkVal'], fill=fill(STATUS_GREEN)))
 
-    freeze_header(ws, first_data_row)
+    # Long list (850+ rows): keep the column headers visible while scrolling.
+    ws.freeze_panes = ws.cell(row=first_data_row, column=1)
     set_col_widths(ws, {"A": 8, "B": 58, "C": 14, "D": 14, "E": 12, "F": 20})
     ws.row_dimensions[header_row_top].height = 20
 

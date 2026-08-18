@@ -63,7 +63,8 @@ def build_guest_list(wb, dv_named):
     ws.conditional_formatting.add(f"F{first_data_row}:F{last_data_row}",
         FormulaRule(formula=[f'EXACT(F{first_data_row},"No")'], fill=fill(STATUS_RED)))
 
-    freeze_header(ws, first_data_row)
+    # Long guest list: keep the column headers visible while scrolling.
+    ws.freeze_panes = ws.cell(row=first_data_row, column=1)
     set_col_widths(ws, {"A": 20, "B": 12, "C": 8, "D": 12, "E": 12, "F": 12, "G": 16, "H": 14, "I": 14, "J": 22, "K": 26})
 
     # KPI formulas
