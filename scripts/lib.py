@@ -144,10 +144,8 @@ def band_table(ws, first_data_row, last_data_row, col_start, col_end, light_colo
         style_data_row(ws, r, col_start, col_end, banding_color=band)
 
 def freeze_header(ws, row):
-    # Freeze panes intentionally disabled: the frozen-pane divider draws a grey
-    # line across the whole sheet in Excel's view, which reads as clutter on a
-    # premium template. Kept as a no-op so callers don't need changing.
-    return
+    # Keep the header row(s) visible while scrolling on every tab.
+    ws.freeze_panes = ws.cell(row=row, column=1)
 
 def autosize(ws, col_min_widths):
     """col_min_widths: dict col_letter -> minimum width; sets widths (approx autosize)."""

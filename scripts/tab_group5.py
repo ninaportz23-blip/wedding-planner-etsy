@@ -182,6 +182,7 @@ def build_stationery(wb, dv_named):
                f"'Stationery Checklist'!${letter_v}${hr3+1}:${letter_v}${cend}", "M36", width=9.5, height=6.8)
 
     set_col_widths(ws, {"A": 18, "B": 20, "C": 10, "D": 15, "E": 15, "F": 13, "G": 18, "H": 14, "I": 15, "J": 15, "K": 13})
+    freeze_header(ws, first)
 
 
 def build_save_the_date(wb):

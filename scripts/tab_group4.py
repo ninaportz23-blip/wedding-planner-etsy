@@ -123,6 +123,7 @@ def build_decor(wb, dv_named):
              f"'Decor Inventory'!${letter_v}${hr}:${letter_v}${lend}", "K4", width=12, height=8)
 
     set_col_widths(ws, {"A": 22, "B": 18, "C": 16, "D": 14, "E": 10, "F": 13, "G": 10, "H": 13, "I": 20})
+    freeze_header(ws, first)
 
 
 def build_flowers(wb, dv_named):
@@ -177,6 +178,7 @@ def build_flowers(wb, dv_named):
              f"'Flower Arrangements'!$E${header_row}:$E${send}", "K4", width=12, height=8, colors=[BLUSH])
 
     set_col_widths(ws, {"A": 20, "B": 16, "C": 13, "D": 10, "E": 13, "F": 14, "G": 20, "H": 20, "I": 18})
+    freeze_header(ws, first)
 
 
 def build_attire_makeup(wb, dv_named):
