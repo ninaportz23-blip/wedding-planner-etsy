@@ -69,9 +69,9 @@ def build_guest_list(wb, dv_named):
     # KPI formulas
     v = ws.cell(row=kpi_row + 1, column=1, value=f'=COUNTA(A{first_data_row}:A{last_data_row})')
     v.font = f_kpi_number(size=15)
-    v = ws.cell(row=kpi_row + 1, column=3, value=f'=COUNTIFS(D{first_data_row}:D{last_data_row},TRUE)')
+    v = ws.cell(row=kpi_row + 1, column=3, value=f'=COUNTIFS(D{first_data_row}:D{last_data_row},ChkVal)')
     v.font = f_kpi_number(size=15)
-    v = ws.cell(row=kpi_row + 1, column=5, value=f'=COUNTIFS(E{first_data_row}:E{last_data_row},TRUE)')
+    v = ws.cell(row=kpi_row + 1, column=5, value=f'=COUNTIFS(E{first_data_row}:E{last_data_row},ChkVal)')
     v.font = f_kpi_number(size=15)
     v = ws.cell(row=kpi_row + 1, column=7, value=f'=COUNTIFS(F{first_data_row}:F{last_data_row},"Yes")')
     v.font = f_kpi_number(size=15)

@@ -27,10 +27,16 @@ def build_checklist(wb, dv_named):
     color_cycle = PALETTE_ROTATION
     total_items = sum(len(items) for _, items in CHECKLIST_SECTIONS)
     idx_all = 0
+    # Seed the earliest timeframes as completed so the sample shows realistic
+    # progress (the demo wedding is ~10 months out).
+    done_sections = {"12+ Months Before", "10-12 Months Before"}
+    half_done_sections = {"8-10 Months Before"}
     for s_i, (section_name, items) in enumerate(CHECKLIST_SECTIONS):
         section_start = row
-        for item in items:
-            c_done = ws.cell(row=row, column=1, value=False)
+        for i_item, item in enumerate(items):
+            done = section_name in done_sections or (
+                section_name in half_done_sections and i_item % 2 == 0)
+            c_done = ws.cell(row=row, column=1, value=True if done else False)
             c_done.alignment = CENTER
             c_task = ws.cell(row=row, column=2, value=item)
             c_task.alignment = LEFT
@@ -91,11 +97,11 @@ def build_checklist(wb, dv_named):
     # overdue + not done -> red task text row banding via date col
     ws.conditional_formatting.add(
         f"C{first_data_row}:C{last_data_row}",
-        FormulaRule(formula=[f'AND(C{first_data_row}<TODAY(),A{first_data_row}=FALSE)'], fill=fill(STATUS_RED)))
+        FormulaRule(formula=[f'AND(C{first_data_row}<TODAY(),A{first_data_row}<>ChkVal)'], fill=fill(STATUS_RED)))
     # done rows -> green highlight on Task cell
     ws.conditional_formatting.add(
         f"B{first_data_row}:B{last_data_row}",
-        FormulaRule(formula=[f'A{first_data_row}=TRUE'], fill=fill(STATUS_GREEN)))
+        FormulaRule(formula=[f'A{first_data_row}=ChkVal'], fill=fill(STATUS_GREEN)))
 
     freeze_header(ws, first_data_row)
     set_col_widths(ws, {"A": 8, "B": 58, "C": 14, "D": 14, "E": 12, "F": 20})
@@ -116,7 +122,7 @@ def build_checklist(wb, dv_named):
     for section_name, (s0, s1) in section_ranges.items():
         ws.cell(row=srow, column=summary_col, value=section_name).font = f_body()
         pct_cell = ws.cell(row=srow, column=summary_col + 1,
-                            value=f"=COUNTIFS(A{s0}:A{s1},TRUE)/COUNTA(B{s0}:B{s1})")
+                            value=f"=COUNTIFS(A{s0}:A{s1},ChkVal)/COUNTA(B{s0}:B{s1})")
         pct_cell.number_format = "0%"
         pct_cell.font = f_body()
         cnt_cell = ws.cell(row=srow, column=summary_col + 2, value=f"=COUNTA(B{s0}:B{s1})")
@@ -138,7 +144,7 @@ def build_checklist(wb, dv_named):
     for person in ["Bride", "Groom", "Both", "Wedding Planner", "Maid of Honor", "Best Man", "Parent", "Other"]:
         ws.cell(row=srow, column=summary_col, value=person).font = f_body()
         ws.cell(row=srow, column=summary_col + 1,
-                value=f'=COUNTIFS($D${first_data_row}:$D${last_data_row},{ws.cell(row=srow, column=summary_col).coordinate},$A${first_data_row}:$A${last_data_row},FALSE)').font = f_body()
+                value=f'=COUNTIFS($D${first_data_row}:$D${last_data_row},{ws.cell(row=srow, column=summary_col).coordinate},$A${first_data_row}:$A${last_data_row},UnchkVal)').font = f_body()
         srow += 1
     person_end = srow - 1
 

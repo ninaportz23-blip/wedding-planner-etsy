@@ -165,7 +165,7 @@ def build_shot_list(wb):
                 ws.cell(row=r, column=1).alignment = CENTER
             add_checkbox_col(ws, f"A{first}:A{first+len(shots)-1}")
             ws.conditional_formatting.add(f"A{first}:A{first+len(shots)-1}",
-                FormulaRule(formula=[f"A{first}=TRUE"], fill=fill(STATUS_GREEN)))
+                FormulaRule(formula=[f"A{first}=ChkVal"], fill=fill(STATUS_GREEN)))
             row = hdr + len(shots) + 1
     set_col_widths(ws, {"A": 12, "B": 30, "C": 30})
     freeze_header(ws, 1)

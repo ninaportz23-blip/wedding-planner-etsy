@@ -148,15 +148,15 @@ def build_honeymoon(wb, dv_named):
     clast = hdr + len(tasks) - 1
     add_checkbox_col(ws, f"A{cfirst}:A{clast}")
     dv_named(ws, f"C{cfirst}:C{clast}", "AssignedTo")
-    ws.conditional_formatting.add(f"A{cfirst}:A{clast}", FormulaRule(formula=[f"A{cfirst}=TRUE"], fill=fill(STATUS_GREEN)))
+    ws.conditional_formatting.add(f"A{cfirst}:A{clast}", FormulaRule(formula=[f"A{cfirst}=ChkVal"], fill=fill(STATUS_GREEN)))
 
     helper_col = 6
     ws.cell(row=hdr - 1, column=helper_col, value="Status").font = f_header()
     ws.cell(row=hdr - 1, column=helper_col + 1, value="Count").font = f_header()
     ws.cell(row=hdr, column=helper_col, value="Done")
-    ws.cell(row=hdr, column=helper_col + 1, value=f"=COUNTIF(A{cfirst}:A{clast},TRUE)")
+    ws.cell(row=hdr, column=helper_col + 1, value=f"=COUNTIF(A{cfirst}:A{clast},ChkVal)")
     ws.cell(row=hdr + 1, column=helper_col, value="Incomplete")
-    ws.cell(row=hdr + 1, column=helper_col + 1, value=f"=COUNTIF(A{cfirst}:A{clast},FALSE)")
+    ws.cell(row=hdr + 1, column=helper_col + 1, value=f"=COUNTIF(A{cfirst}:A{clast},UnchkVal)")
     letter_c = get_column_letter(helper_col); letter_v = get_column_letter(helper_col + 1)
     make_donut(ws, "Checklist Progress", f"'Honeymoon Planner'!${letter_c}${hdr}:${letter_c}${hdr+1}",
                f"'Honeymoon Planner'!${letter_v}${hdr}:${letter_v}${hdr+1}", f"F{hdr+3}", colors=[SAGE, GREY], width=10, height=7)
@@ -167,7 +167,7 @@ def build_honeymoon(wb, dv_named):
     for i, person in enumerate(ASSIGNED_TO):
         ws.cell(row=hdr + i, column=helper_col + 3, value=person)
         ws.cell(row=hdr + i, column=helper_col + 4,
-                value=f'=COUNTIFS($C${cfirst}:$C${clast},{ws.cell(row=hdr+i, column=helper_col+3).coordinate},$A${cfirst}:$A${clast},FALSE)')
+                value=f'=COUNTIFS($C${cfirst}:$C${clast},{ws.cell(row=hdr+i, column=helper_col+3).coordinate},$A${cfirst}:$A${clast},UnchkVal)')
     aend = hdr + len(ASSIGNED_TO) - 1
     make_bar(ws, "Incomplete by Assigned To", f"'Honeymoon Planner'!${get_column_letter(helper_col+3)}${hdr}:${get_column_letter(helper_col+3)}${aend}",
              f"'Honeymoon Planner'!${get_column_letter(helper_col+4)}${hdr-1}:${get_column_letter(helper_col+4)}${aend}", f"I{hdr+3}", width=14, height=8)
@@ -203,10 +203,10 @@ def build_gifts_thank_you(wb, dv_named):
             ws.cell(row=r, column=cc).font = f_body()
             ws.cell(row=r, column=cc).fill = fill(OFFWHITE if i % 2 else WHITE)
     add_checkbox_col(ws, f"D{first}:D{last}")
-    ws.conditional_formatting.add(f"D{first}:D{last}", FormulaRule(formula=[f"D{first}=TRUE"], fill=fill(STATUS_GREEN)))
+    ws.conditional_formatting.add(f"D{first}:D{last}", FormulaRule(formula=[f"D{first}=ChkVal"], fill=fill(STATUS_GREEN)))
 
     v = ws.cell(row=kpi_row + 1, column=1,
-                value=f'=IFERROR(COUNTIF(D{first}:D{last},TRUE)&" / "&COUNTA(A{first}:A{last}),"0 / 0")')
+                value=f'=IFERROR(COUNTIF(D{first}:D{last},ChkVal)&" / "&COUNTA(A{first}:A{last}),"0 / 0")')
     v.font = f_kpi_number(size=15)
 
     freeze_header(ws, header_row)

@@ -53,6 +53,7 @@ def build_lists(wb):
         "PaymentStatus": PAYMENT_STATUS,
         "PaymentType": PAYMENT_TYPE,
         "TrueFalse": TRUE_FALSE,
+        "CheckBox": CHECKBOX,
         "BachelorType": BACHELOR_TYPE,
         "CurrencyList": CURRENCY_LIST,
         "BookingStatus": BOOKING_STATUS,
@@ -67,6 +68,14 @@ def build_lists(wb):
     from openpyxl.workbook.defined_name import DefinedName
     for name, rng in named.items():
         wb.defined_names[name] = DefinedName(name, attr_text=rng)
+
+    # Single-cell references holding the checkbox glyphs, so formulas can test
+    # "is checked" without embedding the glyph (and its quotes) in a string.
+    for glyph, gname in (("☑", "ChkVal"), ("☐", "UnchkVal")):
+        ws.cell(row=1, column=col, value=glyph)
+        letter = get_column_letter(col)
+        wb.defined_names[gname] = DefinedName(gname, attr_text=f"Lists!${letter}$1")
+        col += 1
 
     ws.column_dimensions["A"].width = 18
     return named

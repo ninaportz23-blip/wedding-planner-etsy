@@ -118,9 +118,9 @@ def build_stationery(wb, dv_named):
     ws.conditional_formatting.add(f"D{first}:D{last}", FormulaRule(formula=[f'EXACT(D{first},"Completed")'], fill=fill(STATUS_GREEN)))
     ws.conditional_formatting.add(f"D{first}:D{last}", FormulaRule(formula=[f'EXACT(D{first},"Not Started")'], fill=fill(STATUS_RED)))
     ws.conditional_formatting.add(f"E{first}:E{last}", FormulaRule(formula=[f'EXACT(E{first},"Printed")'], fill=fill(STATUS_GREEN)))
-    ws.conditional_formatting.add(f"F{first}:F{last}", FormulaRule(formula=[f"F{first}=TRUE"], fill=fill(STATUS_GREEN)))
+    ws.conditional_formatting.add(f"F{first}:F{last}", FormulaRule(formula=[f"F{first}=ChkVal"], fill=fill(STATUS_GREEN)))
 
-    v = ws.cell(row=kpi_row + 1, column=1, value=f'=IFERROR(COUNTIF(F{first}:F{last},TRUE)/COUNTA(B{first}:B{last}),0)')
+    v = ws.cell(row=kpi_row + 1, column=1, value=f'=IFERROR(COUNTIF(F{first}:F{last},ChkVal)/COUNTA(B{first}:B{last}),0)')
     v.number_format = "0%"; v.font = f_kpi_number(size=15)
 
     helper_col = 13

@@ -149,7 +149,7 @@ def build_packing(wb, dv_named):
             ws.cell(row=rr, column=2).alignment = CENTER
         add_checkbox_col(ws, f"B{fr+1}:B{lr}")
         dv_named(ws, f"C{fr+1}:C{lr}", "AssignedTo")
-        ws.conditional_formatting.add(f"B{fr+1}:B{lr}", FormulaRule(formula=[f"B{fr+1}=TRUE"], fill=fill(STATUS_GREEN)))
+        ws.conditional_formatting.add(f"B{fr+1}:B{lr}", FormulaRule(formula=[f"B{fr+1}=ChkVal"], fill=fill(STATUS_GREEN)))
         row = lr + 2
     set_col_widths(ws, {"A": 26, "B": 10, "C": 14, "D": 26})
     freeze_header(ws, 1)

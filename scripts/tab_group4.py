@@ -5,28 +5,42 @@ from data_lists import DECOR_LOCATION, DECOR_STATUS, BUY_RENT, ATTIRE_CATEGORY
 
 def build_moodboard(wb):
     ws = new_sheet(wb, "Moodboard", tab_color=LAVENDER)
-    row = title_banner(ws, "MOODBOARD 1", LAVENDER, row=1, col_start=1, col_end=6, size=16)
+    row = title_banner(ws, "Moodboard", LAVENDER, row=1, col_start=1, col_end=6, size=20)
     row += 1
-    ws.cell(row=row, column=1, value="Paste inspiration images below (Insert > Image > Cell), and note the source link underneath each.").font = f_body(italic=True, size=9)
+    intro = ws.cell(row=row, column=1, value="Collect your inspiration here. Click a frame, then use Insert › Picture › Place in cell, and note the source link underneath.")
+    intro.font = f_body(italic=True, size=9, color="7A7A7A")
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=6)
+    ws.row_dimensions[row].height = 16
     row += 2
+
+    set_col_widths(ws, {get_column_letter(c): 16 for c in range(1, 7)})
+    tints = ["tile_blush.png", "tile_sage.png", "tile_cream.png",
+             "tile_powder.png", "tile_peach.png", "tile_lav.png"]
+    col_px = int(16 * 7 + 5)          # ~117px per column
+    block_w = col_px * 2 - 6          # two columns, small inset
+    block_h = int(block_w * 220 / 300)
+    img_rows = 6
+    row_h_pt = (block_h / img_rows) / 1.333
+    i = 0
     for gr in range(2):
+        for r in range(row, row + img_rows):
+            ws.row_dimensions[r].height = row_h_pt
         for c in range(3):
             col = 1 + c * 2
-            ws.merge_cells(start_row=row, start_column=col, end_row=row + 5, end_column=col + 1)
-            ph = ws.cell(row=row, column=col, value="[ image ]")
-            ph.font = f_body(italic=True, color="9A9A9A")
-            ph.alignment = CENTER
-            ph.fill = fill(OFFWHITE)
-            for rr in range(row, row + 6):
+            ws.merge_cells(start_row=row, start_column=col, end_row=row + img_rows - 1, end_column=col + 1)
+            # subtle card behind the frame
+            for rr in range(row, row + img_rows):
                 for cc in (col, col + 1):
-                    ws.cell(row=rr, column=cc).border = BORDER_ALL
-            link_row = row + 6
+                    ws.cell(row=rr, column=cc).fill = fill(WHITE)
+            anchor = f"{get_column_letter(col)}{row}"
+            embed_image(ws, tints[i % len(tints)], anchor, block_w, block_h)
+            i += 1
+            link_row = row + img_rows
             ws.merge_cells(start_row=link_row, start_column=col, end_row=link_row, end_column=col + 1)
-            lc = ws.cell(row=link_row, column=col, value="Source URL:")
-            lc.font = f_body(size=9)
-        row += 8
-    set_col_widths(ws, {get_column_letter(c): 16 for c in range(1, 7)})
+            lc = ws.cell(row=link_row, column=col, value="Source:")
+            lc.font = f_body(size=9, color="9A9A9A")
+            ws.row_dimensions[link_row].height = 16
+        row += img_rows + 2
     freeze_header(ws, 1)
 
 

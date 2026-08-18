@@ -27,8 +27,8 @@ def wire_registry(ws, first, last, dv_named):
     dv_named(ws, f"E{first}:E{last}", "Priority")
     add_checkbox_col(ws, f"F{first}:F{last}")
     add_checkbox_col(ws, f"H{first}:H{last}")
-    ws.conditional_formatting.add(f"F{first}:F{last}", FormulaRule(formula=[f"F{first}=TRUE"], fill=fill(STATUS_GREEN)))
-    ws.conditional_formatting.add(f"H{first}:H{last}", FormulaRule(formula=[f"H{first}=TRUE"], fill=fill(STATUS_GREEN)))
+    ws.conditional_formatting.add(f"F{first}:F{last}", FormulaRule(formula=[f"F{first}=ChkVal"], fill=fill(STATUS_GREEN)))
+    ws.conditional_formatting.add(f"H{first}:H{last}", FormulaRule(formula=[f"H{first}=ChkVal"], fill=fill(STATUS_GREEN)))
     freeze_header(ws, first)
     set_col_widths(ws, {"A": 24, "B": 16, "C": 24, "D": 12, "E": 12, "F": 12, "G": 16, "H": 14})
 
@@ -52,17 +52,27 @@ def build_wedding_party(wb, dv_named):
     first = header_row + 1
     n = 20
     last = first + n - 1
-    sample = [(True, "Jamie Lee", "Maid of Honor"), (True, "Sam Rivera", "Best Man")]
+    sample = [
+        (True, "Jamie Lee", "Maid of Honor", "Ready"),
+        (True, "Sam Rivera", "Best Man", "Ready"),
+        (True, "Ava Chen", "Bridesmaid", "Fitting Scheduled"),
+        (True, "Noah Brooks", "Groomsman", "Ordered"),
+        (True, "Mia Torres", "Bridesmaid", "Received"),
+        (True, "Ethan Park", "Groomsman", "Ordered"),
+        (True, "Zoe Nguyen", "Bridesmaid", "Alterations Needed"),
+        (False, "Liam Foster", "Groomsman", "Not Started"),
+    ]
     for i in range(n):
         r = first + i
         if i < len(sample):
-            conf, name, role = sample[i]
+            conf, name, role, attire = sample[i]
             ws.cell(row=r, column=1, value=conf)
             ws.cell(row=r, column=2, value=name)
             ws.cell(row=r, column=3, value=role)
+            ws.cell(row=r, column=7, value=attire)
         else:
             ws.cell(row=r, column=1, value=False)
-        ws.cell(row=r, column=7, value="Not Started")
+            ws.cell(row=r, column=7, value="Not Started")
         for cc in range(1, 9):
             ws.cell(row=r, column=cc).border = BORDER_ALL
             ws.cell(row=r, column=cc).font = f_body()
@@ -70,13 +80,13 @@ def build_wedding_party(wb, dv_named):
     add_checkbox_col(ws, f"A{first}:A{last}")
     dv_named(ws, f"C{first}:C{last}", "WeddingPartyRole")
     dv_named(ws, f"G{first}:G{last}", "AttireStatus")
-    ws.conditional_formatting.add(f"A{first}:A{last}", FormulaRule(formula=[f"A{first}=TRUE"], fill=fill(STATUS_GREEN)))
+    ws.conditional_formatting.add(f"A{first}:A{last}", FormulaRule(formula=[f"A{first}=ChkVal"], fill=fill(STATUS_GREEN)))
     status_colors = {"Not Started": GREY, "Ordered": CREAM, "Received": POWDER, "Fitting Scheduled": LAVENDER,
                       "Alterations Needed": STATUS_RED, "Ready": STATUS_GREEN}
     for st, color in status_colors.items():
         ws.conditional_formatting.add(f"G{first}:G{last}", FormulaRule(formula=[f'EXACT(G{first},"{st}")'], fill=fill(color)))
 
-    v = ws.cell(row=kpi_row + 1, column=1, value=f'=IFERROR(COUNTIF(A{first}:A{last},TRUE)/COUNTA(B{first}:B{last}),0)')
+    v = ws.cell(row=kpi_row + 1, column=1, value=f'=IFERROR(COUNTIF(A{first}:A{last},ChkVal)/COUNTA(B{first}:B{last}),0)')
     v.number_format = "0%"; v.font = f_kpi_number(size=14)
     v = ws.cell(row=kpi_row + 1, column=3, value=f'=COUNTIF(C{first}:C{last},"Bridesmaid")')
     v.font = f_kpi_number(size=14)
@@ -176,7 +186,7 @@ def build_party_gifts(wb, dv_named):
     add_checkbox_col(ws, f"I{first}:I{last}")
     ws.conditional_formatting.add(f"H{first}:H{last}", FormulaRule(formula=[f'EXACT(H{first},"Purchased")'], fill=fill(STATUS_GREEN)))
     ws.conditional_formatting.add(f"H{first}:H{last}", FormulaRule(formula=[f'EXACT(H{first},"Need to Buy")'], fill=fill(STATUS_YELLOW)))
-    ws.conditional_formatting.add(f"I{first}:I{last}", FormulaRule(formula=[f"I{first}=TRUE"], fill=fill(STATUS_GREEN)))
+    ws.conditional_formatting.add(f"I{first}:I{last}", FormulaRule(formula=[f"I{first}=ChkVal"], fill=fill(STATUS_GREEN)))
 
     v = ws.cell(row=kpi_row + 1, column=1, value=f"=COUNTA(B{first}:B{last})")
     v.font = f_kpi_number(size=14)
@@ -187,9 +197,9 @@ def build_party_gifts(wb, dv_named):
     v = ws.cell(row=kpi_row + 1, column=7, value=f'=COUNTIF(H{first}:H{last},"Purchased")')
     v.font = f_kpi_number(size=14)
     v = ws.cell(row=kpi_row + 1, column=9,
-                value=f'=COUNTIFS(H{first}:H{last},"Purchased",I{first}:I{last},FALSE)')
+                value=f'=COUNTIFS(H{first}:H{last},"Purchased",I{first}:I{last},UnchkVal)')
     v.font = f_kpi_number(size=14)
-    v = ws.cell(row=kpi_row + 1, column=11, value=f"=COUNTIF(I{first}:I{last},TRUE)")
+    v = ws.cell(row=kpi_row + 1, column=11, value=f"=COUNTIF(I{first}:I{last},ChkVal)")
     v.font = f_kpi_number(size=14)
 
     freeze_header(ws, header_row)

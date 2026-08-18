@@ -29,6 +29,7 @@ PRINT_STATUS = ["Not Needed", "Not Ordered", "Ordered", "Printed"]
 PAYMENT_STATUS = ["Not Due", "Due Soon", "Paid", "Overdue"]
 PAYMENT_TYPE = ["Deposit", "Progress Payment", "Final Payment", "Gratuity"]
 TRUE_FALSE = [True, False]
+CHECKBOX = ["☑", "☐"]  # ☑ / ☐  text glyphs (locale-independent)
 BACHELOR_TYPE = ["Party", "Trip"]
 CURRENCY_LIST = ["USD", "EUR", "GBP", "CAD", "AUD", "MXN", "JPY"]
 BOOKING_STATUS = ["Researching", "Contacted", "Booked", "Paid", "Cancelled"]

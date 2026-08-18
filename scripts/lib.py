@@ -38,9 +38,14 @@ STATUS_YELLOW = "F5EFC6"
 PALETTE_ROTATION = [LAVENDER, BLUSH, SAGE, CREAM, POWDER, PEACH]
 
 # ---------------------------------------------------------------- FONTS ----
-FONT_NAME = "Calibri"
+FONT_NAME = "Calibri"          # body font (universally available)
+FONT_SERIF = "Georgia"         # editorial serif for titles (Win + Mac default)
 
 def f_title(color=CHARCOAL, size=16):
+    # Serif display face gives the workbook a soft, editorial "wedding" feel.
+    return Font(name=FONT_SERIF, bold=False, size=size, color=color)
+
+def f_eyebrow(color=CHARCOAL, size=8):
     return Font(name=FONT_NAME, bold=True, size=size, color=color)
 
 def f_header(color=CHARCOAL, size=11):
@@ -151,17 +156,27 @@ def add_dropdown(ws, cell_range, formula, allow_blank=True):
     dv.add(cell_range)
     return dv
 
-CHECKBOX_FMT = '"☑";;"☐"'  # checked box glyph for TRUE (1), empty box glyph for FALSE (0)
+# Locale-independent checkbox glyphs stored as *text* (not booleans).
+# Real Excel renders boolean TRUE/FALSE in the user's language (WAAR/ONWAAR in
+# Dutch), and a number format does not override that. Storing the actual box
+# glyph as text shows identically in every locale, in the cell and the dropdown.
+CHK = "☑"    # ☑ checked
+UNCHK = "☐"  # ☐ unchecked
 
-def add_checkbox_col(ws, cell_range):
-    """TRUE/FALSE dropdown styled as a checkbox: displays as a checked/empty box glyph
-    regardless of the value's underlying boolean type, and stays a real boolean for formulas."""
-    dv = DataValidation(type="list", formula1="=TrueFalse", allow_blank=True, showDropDown=False)
+def add_checkbox_col(ws, cell_range, default_unchecked=True):
+    """Checkbox column backed by text glyphs (☑ / ☐), locale-independent.
+    Empty cells are pre-filled with ☐ so the column always reads as checkboxes."""
+    dv = DataValidation(type="list", formula1="=CheckBox", allow_blank=True, showDropDown=False)
     ws.add_data_validation(dv)
     dv.add(cell_range)
+    big = Font(name=FONT_NAME, size=13, color=CHARCOAL)
     for row in ws[cell_range]:
         for cell in row:
-            cell.number_format = CHECKBOX_FMT
+            if default_unchecked and cell.value in (None, "", False):
+                cell.value = UNCHK
+            elif cell.value is True:
+                cell.value = CHK
+            cell.font = big
             cell.alignment = CENTER
     return dv
 
@@ -184,6 +199,30 @@ def cf_bool_true(ws, cell_range, color=STATUS_GREEN):
 
 CHART_COLORS = [LAVENDER, BLUSH, SAGE, CREAM, POWDER, PEACH, DARK_LAVENDER, DARK_BLUSH, DARK_SAGE, DARK_CREAM]
 
+
+def clean_chart_frame(chart, legend="r"):
+    """Strip the default chart border/fill so charts sit cleanly on the sheet,
+    remove gridlines, and place a tidy legend (or hide it with legend=None)."""
+    from openpyxl.chart.shapes import GraphicalProperties
+    from openpyxl.drawing.line import LineProperties
+    noline = GraphicalProperties()
+    noline.noFill = True
+    noline.line = LineProperties(noFill=True)
+    chart.graphical_properties = noline
+    try:
+        pa = GraphicalProperties()
+        pa.noFill = True
+        pa.line = LineProperties(noFill=True)
+        chart.plot_area.graphicalProperties = pa
+    except Exception:
+        pass
+    if legend is None:
+        chart.legend = None
+    elif chart.legend is not None:
+        chart.legend.position = legend
+        chart.legend.overlay = False
+    return chart
+
 def style_chart_series_colors(chart, colors=None):
     from openpyxl.chart.marker import DataPoint
     from openpyxl.drawing.fill import PatternFillProperties
@@ -197,9 +236,10 @@ def style_chart_series_colors(chart, colors=None):
             pts.append(dp)
         s.data_points = pts
 
-def make_donut(ws, title, cat_ref, val_ref, anchor, colors=None, width=8, height=6):
+def make_donut(ws, title, cat_ref, val_ref, anchor, colors=None, width=8, height=6,
+               legend="b", hole=62):
     chart = DoughnutChart()
-    chart.title = title
+    chart.title = title if title else None
     chart.style = 10
     chart.add_data(val_ref, titles_from_data=False)
     chart.set_categories(cat_ref)
@@ -212,6 +252,7 @@ def make_donut(ws, title, cat_ref, val_ref, anchor, colors=None, width=8, height
     chart.dataLabels.showSerName = False
     chart.dataLabels.showVal = False
     chart.dataLabels.showLegendKey = False
+    clean_chart_frame(chart, legend=legend)
     ws.add_chart(chart, anchor)
     return chart
 
@@ -229,12 +270,13 @@ def make_bar(ws, title, cat_ref, val_ref, anchor, colors=None, width=10, height=
     for i, s in enumerate(chart.series):
         s.graphicalProperties.solidFill = colors[i % len(colors)]
         s.graphicalProperties.line.noFill = True
+    clean_chart_frame(chart, legend=("r" if series_titles else None))
     ws.add_chart(chart, anchor)
     return chart
 
-def make_pie(ws, title, cat_ref, val_ref, anchor, colors=None, width=8, height=6):
+def make_pie(ws, title, cat_ref, val_ref, anchor, colors=None, width=8, height=6, legend="b"):
     chart = PieChart()
-    chart.title = title
+    chart.title = title if title else None
     chart.style = 10
     chart.add_data(val_ref, titles_from_data=False)
     chart.set_categories(cat_ref)
@@ -247,6 +289,7 @@ def make_pie(ws, title, cat_ref, val_ref, anchor, colors=None, width=8, height=6
     chart.dataLabels.showSerName = False
     chart.dataLabels.showVal = False
     chart.dataLabels.showLegendKey = False
+    clean_chart_frame(chart, legend=legend)
     ws.add_chart(chart, anchor)
     return chart
 
@@ -255,6 +298,21 @@ def hyperlink_cell(ws, row, col, text, target_sheet):
     c.hyperlink = f"#'{target_sheet}'!A1"
     c.font = Font(name=FONT_NAME, color="6B5CA5", underline="single", size=11)
     return c
+
+import os as _os
+_ASSET_DIR = _os.path.join(_os.path.dirname(__file__), "..", "assets")
+
+def embed_image(ws, filename, anchor_cell, width_px, height_px):
+    """Place a placeholder/photo PNG from assets/ at anchor_cell, sized in px."""
+    from openpyxl.drawing.image import Image as XLImage
+    path = _os.path.join(_ASSET_DIR, filename)
+    if not _os.path.exists(path):
+        return None
+    img = XLImage(path)
+    img.width = width_px
+    img.height = height_px
+    ws.add_image(img, anchor_cell)
+    return img
 
 CURRENCY_FMT = '$#,##0.00'
 DATE_FMT = 'DD-MMM-YYYY'
