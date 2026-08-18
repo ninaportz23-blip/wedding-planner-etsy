@@ -60,11 +60,31 @@ def build_decor(wb, dv_named):
     first = header_row + 1
     n = 40
     last = first + n - 1
+    decor_sample = [
+        ("Ceremony arch", "Ceremony", "Petal & Vine", "Confirmed", "Rent", 350, 1),
+        ("Aisle lanterns", "Ceremony", "Glow Rentals", "Confirmed", "Rent", 18, 12),
+        ("Welcome sign", "Reception Entrance", "Copper Press", "Confirmed", "Buy", 90, 1),
+        ("Table centerpieces", "Reception Tables", "Petal & Vine", "Confirmed", "Rent", 45, 15),
+        ("Table linens", "Reception Tables", "Linen Co.", "Confirmed", "Rent", 12, 15),
+        ("Head table garland", "Head Table", "Petal & Vine", "To Be Decided", "Rent", 220, 1),
+        ("String lights", "Reception Tables", "Glow Rentals", "Confirmed", "Rent", 8, 20),
+        ("Candles & votives", "Reception Tables", "Copper Press", "To Be Decided", "Buy", 3, 60),
+    ]
     for i in range(n):
         r = first + i
-        ws.cell(row=r, column=4, value="To Be Decided")
-        ws.cell(row=r, column=6, value=0).number_format = CURRENCY_FMT
-        ws.cell(row=r, column=7, value=1)
+        if i < len(decor_sample):
+            itm, loc, ven, st, br, cpu, qty = decor_sample[i]
+            ws.cell(row=r, column=1, value=itm)
+            ws.cell(row=r, column=2, value=loc)
+            ws.cell(row=r, column=3, value=ven)
+            ws.cell(row=r, column=4, value=st)
+            ws.cell(row=r, column=5, value=br)
+            ws.cell(row=r, column=6, value=cpu).number_format = CURRENCY_FMT
+            ws.cell(row=r, column=7, value=qty)
+        else:
+            ws.cell(row=r, column=4, value="To Be Decided")
+            ws.cell(row=r, column=6, value=0).number_format = CURRENCY_FMT
+            ws.cell(row=r, column=7, value=1)
         ws.cell(row=r, column=8, value=f"=F{r}*G{r}").number_format = CURRENCY_FMT
         for cc in range(1, 10):
             ws.cell(row=r, column=cc).border = BORDER_ALL
@@ -86,10 +106,10 @@ def build_decor(wb, dv_named):
     v = ws.cell(row=kpi_row + 1, column=7, value=f'=COUNTIF(D{first}:D{last},"Cancelled")')
     v.font = f_kpi_number(size=14)
 
-    helper_col = 11
-    hr = kpi_row
-    ws.cell(row=hr, column=helper_col, value="Location").font = f_header()
-    ws.cell(row=hr, column=helper_col + 1, value="Confirmed Cost").font = f_header()
+    helper_col = 30  # AD, hidden
+    hr = 2
+    ws.cell(row=hr, column=helper_col, value="Location")
+    ws.cell(row=hr, column=helper_col + 1, value="Confirmed Cost")
     for i, loc in enumerate(DECOR_LOCATION):
         ws.cell(row=hr + 1 + i, column=helper_col, value=loc)
         ws.cell(row=hr + 1 + i, column=helper_col + 1,
@@ -97,11 +117,12 @@ def build_decor(wb, dv_named):
     lend = hr + len(DECOR_LOCATION)
     letter_c = get_column_letter(helper_col)
     letter_v = get_column_letter(helper_col + 1)
-    make_bar(ws, "Cost of Confirmed Items by Location", f"'Decor Inventory'!${letter_c}${hr+1}:${letter_c}${lend}",
-             f"'Decor Inventory'!${letter_v}${hr}:${letter_v}${lend}", "K4", width=16, height=9)
+    for hcol in (helper_col, helper_col + 1):
+        ws.column_dimensions[get_column_letter(hcol)].hidden = False
+    make_bar(ws, "Confirmed Decor Cost by Location", f"'Decor Inventory'!${letter_c}${hr+1}:${letter_c}${lend}",
+             f"'Decor Inventory'!${letter_v}${hr}:${letter_v}${lend}", "K4", width=12, height=8)
 
-    freeze_header(ws, header_row)
-    set_col_widths(ws, {"A": 22, "B": 16, "C": 16, "D": 14, "E": 10, "F": 12, "G": 10, "H": 12, "I": 20})
+    set_col_widths(ws, {"A": 22, "B": 18, "C": 16, "D": 14, "E": 10, "F": 13, "G": 10, "H": 13, "I": 20})
 
 
 def build_flowers(wb, dv_named):
@@ -118,16 +139,23 @@ def build_flowers(wb, dv_named):
     first = header_row + 1
     n = 30
     last = first + n - 1
-    sample_items = ["Bridal Bouquet", "Bridesmaid Bouquets", "Boutonnieres", "Corsages", "Ceremony Arch Florals",
-                     "Centerpieces", "Aisle Decor", "Cake Florals"]
+    sample_items = [("Bridal Bouquet", 180, 1, "Confirmed"), ("Bridesmaid Bouquets", 75, 4, "Confirmed"),
+                    ("Boutonnieres", 18, 6, "Ordered"), ("Corsages", 22, 4, "Ordered"),
+                    ("Ceremony Arch Florals", 450, 1, "Not Started"), ("Centerpieces", 65, 15, "Confirmed"),
+                    ("Aisle Decor", 40, 8, "Not Started"), ("Cake Florals", 90, 1, "Ordered")]
     for i in range(n):
         r = first + i
         if i < len(sample_items):
-            ws.cell(row=r, column=1, value=sample_items[i])
-        ws.cell(row=r, column=3, value=0).number_format = CURRENCY_FMT
-        ws.cell(row=r, column=4, value=1)
+            itm, cpu, qty, st = sample_items[i]
+            ws.cell(row=r, column=1, value=itm)
+            ws.cell(row=r, column=3, value=cpu).number_format = CURRENCY_FMT
+            ws.cell(row=r, column=4, value=qty)
+            ws.cell(row=r, column=6, value=st)
+        else:
+            ws.cell(row=r, column=3, value=0).number_format = CURRENCY_FMT
+            ws.cell(row=r, column=4, value=1)
+            ws.cell(row=r, column=6, value="Not Started")
         ws.cell(row=r, column=5, value=f"=C{r}*D{r}").number_format = CURRENCY_FMT
-        ws.cell(row=r, column=6, value="Not Started")
         for cc in range(1, 10):
             ws.cell(row=r, column=cc).border = BORDER_ALL
             ws.cell(row=r, column=cc).font = f_body()
@@ -142,19 +170,13 @@ def build_flowers(wb, dv_named):
     v = ws.cell(row=kpi_row + 1, column=4, value=f"=SUM(E{first}:E{last})")
     v.number_format = CURRENCY_FMT; v.font = f_kpi_number(size=15)
 
-    helper_col = 11
-    hr = kpi_row
-    ws.cell(row=hr, column=helper_col, value="Florist").font = f_header()
-    ws.cell(row=hr, column=helper_col + 1, value="Cost").font = f_header()
-    ws.cell(row=hr + 1, column=helper_col, value="='Vendor Selection'!C6")
-    ws.cell(row=hr + 1, column=helper_col + 1, value=f"=SUM(E{first}:E{last})")
-    letter_c = get_column_letter(helper_col)
-    letter_v = get_column_letter(helper_col + 1)
-    make_bar(ws, "Cost by Vendor", f"'Flower Arrangements'!${letter_c}${hr+1}:${letter_c}${hr+1}",
-             f"'Flower Arrangements'!${letter_v}${hr}:${letter_v}${hr+1}", "K4", width=14, height=8)
+    # Chart: total cost per arrangement (uses the item + total columns directly).
+    srow = first
+    send = first + len(sample_items) - 1
+    make_bar(ws, "Cost by Arrangement", f"'Flower Arrangements'!$A${srow}:$A${send}",
+             f"'Flower Arrangements'!$E${header_row}:$E${send}", "K4", width=12, height=8, colors=[BLUSH])
 
-    freeze_header(ws, header_row)
-    set_col_widths(ws, {"A": 20, "B": 16, "C": 12, "D": 10, "E": 12, "F": 14, "G": 20, "H": 20, "I": 18})
+    set_col_widths(ws, {"A": 20, "B": 16, "C": 13, "D": 10, "E": 13, "F": 14, "G": 20, "H": 20, "I": 18})
 
 
 def build_attire_makeup(wb, dv_named):

@@ -125,7 +125,8 @@ def table_header(ws, row, col_start, headers, color, font_color=CHARCOAL):
         c.fill = fill(color)
         c.alignment = CENTER
         c.border = BORDER_ALL
-    ws.row_dimensions[row].height = 20
+    # Taller header row so two-line wrapped headers are never clipped.
+    ws.row_dimensions[row].height = 30
     return row + 1
 
 def style_data_row(ws, row, col_start, col_end, banding_color=None, base_color=WHITE):
@@ -143,7 +144,10 @@ def band_table(ws, first_data_row, last_data_row, col_start, col_end, light_colo
         style_data_row(ws, r, col_start, col_end, banding_color=band)
 
 def freeze_header(ws, row):
-    ws.freeze_panes = ws.cell(row=row, column=1)
+    # Freeze panes intentionally disabled: the frozen-pane divider draws a grey
+    # line across the whole sheet in Excel's view, which reads as clutter on a
+    # premium template. Kept as a no-op so callers don't need changing.
+    return
 
 def autosize(ws, col_min_widths):
     """col_min_widths: dict col_letter -> minimum width; sets widths (approx autosize)."""
@@ -209,6 +213,9 @@ def clean_chart_frame(chart, legend="r"):
     noline.noFill = True
     noline.line = LineProperties(noFill=True)
     chart.graphical_properties = noline
+    # Plot data even when its source cells sit in hidden helper columns.
+    chart.plotVisOnly = False
+    chart.displayBlanksAs = "gap"
     try:
         pa = GraphicalProperties()
         pa.noFill = True

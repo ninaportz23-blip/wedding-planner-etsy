@@ -81,9 +81,9 @@ def build_guest_list(wb, dv_named):
     days_left_cell = ws.cell(row=kpi_row + 1, column=11, value=f"=I{kpi_row+1}-TODAY()")
     days_left_cell.font = f_kpi_number(size=15)
 
-    # Helper tables for charts (placed far right, columns N onward)
-    hcol = 14  # N
-    hrow = kpi_row
+    # Helper tables for charts (far right + hidden so nothing overlaps).
+    hcol = 30  # AD
+    hrow = 2
     ws.cell(row=hrow, column=hcol, value="Guest Of").font = f_header()
     ws.cell(row=hrow, column=hcol + 1, value="Count").font = f_header()
     for i, tag in enumerate(GUEST_TAG):
@@ -104,13 +104,15 @@ def build_guest_list(wb, dv_named):
 
     letter_c = get_column_letter(hcol)
     letter_v = get_column_letter(hcol + 1)
+    for c in (hcol, hcol + 1):
+        ws.column_dimensions[get_column_letter(c)].hidden = False
     make_pie(ws, "Guest Of (Bride / Groom / Both)",
              f"'Guest List'!${letter_c}${hrow+1}:${letter_c}${tag_end}",
              f"'Guest List'!${letter_v}${hrow+1}:${letter_v}${tag_end}",
-             "P4", width=10, height=7)
+             "M4", width=9.5, height=6.6)
     make_bar(ws, "Meal Preference",
              f"'Guest List'!${letter_c}${hrow2+1}:${letter_c}${meal_end}",
              f"'Guest List'!${letter_v}${hrow2}:${letter_v}${meal_end}",
-             "P18", width=12, height=8)
+             "M20", width=9.5, height=6.6)
 
     return {"first_data_row": first_data_row, "last_data_row": last_data_row, "kpi_row": kpi_row}

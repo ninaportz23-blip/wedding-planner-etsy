@@ -67,11 +67,11 @@ def build_vendor_selection(wb, dv_named):
     kpi_final = ws.cell(row=kpi_row + 1, column=5, value=f'=COUNTIFS(A{first_data_row}:A{last_data_row},"Yes")')
     kpi_final.font = f_kpi_number()
 
-    # Bar chart: vendor cost by category (helper table)
-    help_col = 12  # L
-    hrow = kpi_row
-    ws.cell(row=hrow, column=help_col, value="Category").font = f_header()
-    ws.cell(row=hrow, column=help_col + 1, value="Cost").font = f_header()
+    # Bar chart: vendor cost by category. Source data lives far right + hidden.
+    help_col = 30  # AD
+    hrow = 2
+    ws.cell(row=hrow, column=help_col, value="Category")
+    ws.cell(row=hrow, column=help_col + 1, value="Cost")
     from data_lists import VENDOR_CATEGORY
     cats_start = hrow + 1
     for i, cat in enumerate(VENDOR_CATEGORY):
@@ -82,9 +82,11 @@ def build_vendor_selection(wb, dv_named):
     cats_end = cats_start + len(VENDOR_CATEGORY) - 1
     letter_c = get_column_letter(help_col)
     letter_v = get_column_letter(help_col + 1)
+    for hcol in (help_col, help_col + 1):
+        ws.column_dimensions[get_column_letter(hcol)].hidden = False
     make_bar(ws, "Vendor Cost by Category",
              f"'Vendor Selection'!${letter_c}${cats_start}:${letter_c}${cats_end}",
              f"'Vendor Selection'!${letter_v}${hrow}:${letter_v}${cats_end}",
-             "N4", width=16, height=9)
+             "L4", width=12.5, height=8)
 
     return {"first_data_row": first_data_row, "last_data_row": last_data_row}

@@ -116,3 +116,6 @@ if __name__ == "__main__":
              "peach": PEACH, "cream": CREAM}
     for key, t in tints.items():
         make_placeholder("tile_%s.png" % key, 300, 220, t, caption="ADD IMAGE")
+    # Portrait card frames for Save the Date design options
+    for key, t in {"blush": BLUSH, "cream": CREAM, "sage": SAGE}.items():
+        make_placeholder("card_%s.png" % key, 236, 320, t, caption="ADD DESIGN")

@@ -67,10 +67,17 @@ def build_food_drinks(wb, dv_named):
     row += 1
     courses = ["Appetizers", "Main Course", "Desserts", "Drinks"]
     events = ["Rehearsal Dinner", "Reception"]
-    helper_col = 9
-    hr = 4
-    ws.cell(row=hr, column=helper_col, value="Event").font = f_header()
-    ws.cell(row=hr, column=helper_col + 1, value="Total Cost").font = f_header()
+    # light sample data so the cost chart shows something in the demo
+    sample = {
+        "Rehearsal Dinner": {"Appetizers": ("Bruschetta platter", 180), "Main Course": ("Family-style pasta", 640),
+                              "Desserts": ("Tiramisu", 150), "Drinks": ("House wine", 220)},
+        "Reception": {"Appetizers": ("Passed canapés", 900), "Main Course": ("Plated dinner", 4200),
+                      "Desserts": ("Wedding cake", 650), "Drinks": ("Open bar", 1800)},
+    }
+    helper_col = 30  # AD, hidden
+    hr = 2
+    ws.cell(row=hr, column=helper_col, value="Event")
+    ws.cell(row=hr, column=helper_col + 1, value="Total Cost")
     event_totals_rows = {}
     for i, ev in enumerate(events):
         ws.cell(row=hr + 1 + i, column=helper_col, value=ev)
@@ -94,9 +101,14 @@ def build_food_drinks(wb, dv_named):
             for i in range(n):
                 r = hdr + i
                 ws.cell(row=r, column=1, value=False)
-                ws.cell(row=r, column=2, value="")
+                if i == 0 and ev in sample and course in sample[ev]:
+                    itm, amt = sample[ev][course]
+                    ws.cell(row=r, column=2, value=itm)
+                    ws.cell(row=r, column=4, value=amt).number_format = CURRENCY_FMT
+                else:
+                    ws.cell(row=r, column=2, value="")
+                    ws.cell(row=r, column=4, value=0).number_format = CURRENCY_FMT
                 ws.cell(row=r, column=3, value="")
-                ws.cell(row=r, column=4, value=0).number_format = CURRENCY_FMT
                 ws.cell(row=r, column=5, value=1)
                 ws.cell(row=r, column=6, value=f"=D{r}*E{r}").number_format = CURRENCY_FMT
                 for cc in range(1, 7):
@@ -117,10 +129,12 @@ def build_food_drinks(wb, dv_named):
         ws.cell(row=hr + 1 + i, column=helper_col + 1, value=f"=B{event_totals_rows[ev]}").number_format = CURRENCY_FMT
     letter_c = get_column_letter(helper_col)
     letter_v = get_column_letter(helper_col + 1)
+    for hcol in (helper_col, helper_col + 1):
+        ws.column_dimensions[get_column_letter(hcol)].hidden = False
     make_donut(ws, "Total Cost by Event", f"'Food and Drinks'!${letter_c}${hr+1}:${letter_c}${hr+len(events)}",
-               f"'Food and Drinks'!${letter_v}${hr+1}:${letter_v}${hr+len(events)}", f"I{hr+4}", width=10, height=7)
+               f"'Food and Drinks'!${letter_v}${hr+1}:${letter_v}${hr+len(events)}", "H4", width=9, height=6.6,
+               colors=[BLUSH, SAGE])
     set_col_widths(ws, {"A": 14, "B": 22, "C": 14, "D": 12, "E": 8, "F": 12})
-    freeze_header(ws, 1)
 
 def build_shot_list(wb):
     ws = new_sheet(wb, "Photo and Video Shot List", tab_color=SAGE)
