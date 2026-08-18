@@ -1,53 +1,41 @@
 # -*- coding: utf-8 -*-
 from marketing_lib import *
-from PIL import ImageDraw
 
 img = new_canvas()
-draw_background(img, seed=33)
+draw_paper_background(img, seed=33)
 
-title_block(img, "Venues And Vendors,\nCompared Clearly", "Venue Comparison + Food & Drinks", top=54,
-            title_size=72, subtitle_size=26)
+accent_title(img, "Venues And Vendors", "Compared Clearly", top=64, script_size=40, title_size=70)
+draw_centered_multiline(img, (CANVAS_W / 2, 210), "VENUE COMPARISON + FOOD & DRINKS", font("sans_bold", 24),
+                         MUTED_GREY, 1000)
 
 VEN_SS = "venue-comparison.png"
+venue_box = (170, 290, 1030, 290 + (1030 - 170) / 1.6)
+venue_meta = paste_laptop(img, VEN_SS, venue_box, crop_box_frac=(0.0, 0.0, 1.0, 0.88))
+pill_label(img, (300, venue_box[1] - 6), "VENUE COMPARISON", LAVENDER, font_size=20, pad_x=20, pad_y=10)
+
 FOOD_SS = "food-drinks.png"
-ven_box = (80, 330, 590, 760)
-food_box = (610, 330, 1120, 760)
-paste_device(img, VEN_SS, ven_box, bezel_color=WHITE, style="tablet",
-             crop_box_frac=(0.0, 0.0, 1.0, 0.55), bezel_width=14)
-paste_device(img, FOOD_SS, food_box, bezel_color=WHITE, style="tablet",
-             crop_box_frac=(0.0, 0.0, 0.62, 0.30), bezel_width=14)
+food_w = 520
+food_box = (520, venue_box[3] + 70, 520 + food_w, venue_box[3] + 70 + food_w / 1.38)
+food_meta = paste_tablet(img, FOOD_SS, food_box, crop_box_frac=(0.0, 0.0, 1.0, 1.0), bezel_color=WHITE)
+pill_label(img, (food_box[0] + 90, food_box[1] - 6), "FOOD & DRINKS", PEACH, font_size=18, pad_x=18, pad_y=9)
 
-draw_badge(img, (985, 300), 60, "5 Venues\nSide by Side", SAGE, font_size=16)
+thin_callout(img, (60, venue_box[1] + 55), "**Compare up to 5 venues** side by side on fees and capacity",
+             frame_target(venue_meta, (0.06, 0.12)), align="left", max_width=210)
+thin_callout(img, (1060, venue_box[1] + 55), "**Best value pick** flagged automatically once costs are in",
+             frame_target(venue_meta, (0.75, 0.30)), align="right", max_width=220)
 
-# ---- clean bullet column, no connector lines ----
-panel_box = (110, 870, 1090, 1440)
-draw = ImageDraw.Draw(img, "RGBA")
-shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
-sd = ImageDraw.Draw(shadow)
-sd.rounded_rectangle([panel_box[0], panel_box[1] + 10, panel_box[2], panel_box[3] + 10], radius=34, fill=(20, 16, 30, 45))
-shadow = shadow.filter(ImageFilter.GaussianBlur(20))
-img.paste(Image.alpha_composite(img.convert("RGB").convert("RGBA"), shadow).convert("RGB"), (0, 0))
-draw = ImageDraw.Draw(img, "RGBA")
-rounded_rect(draw, panel_box, radius=34, fill=WHITE, outline=(224, 219, 213), width=2)
+draw_badge(img, (110, venue_box[3] - 40), 58, "5 Venues\nSide By Side", LAVENDER, font_size=16)
 
-bullets = [
-    "**Compare up to 5 venues** side by side: fees, capacity, and availability",
-    "**See your best value pick** flagged automatically once you enter costs",
-    "**Track rehearsal dinner and reception menus** by course, with tasting ratings",
-    "**Know your food and drink total** before you ever sign a catering contract",
-]
-bx = panel_box[0] + 60
-by = panel_box[1] + 55
-row_h = 128
-for text in bullets:
-    r = 20
-    cy = by + r
-    draw.ellipse([bx - r, cy - r, bx + r, cy + r], fill=CHARCOAL)
-    check_pts = [(bx - 10, cy + 1), (bx - 3, cy + 8), (bx + 11, cy - 10)]
-    draw.line(check_pts, fill=WHITE, width=5, joint="curve")
-    draw_rich_paragraph(img, (bx + 46, by - 6), text, font("sans_semibold", 25), font("sans_extrabold", 25),
-                         CHARCOAL, panel_box[2] - (bx + 46) - 50, line_spacing=1.35)
-    by += row_h
+thin_callout(img, (1060, food_box[1] + 40), "**Track tasting ratings** for every course, item by item",
+             frame_target(food_meta, (0.55, 0.30)), align="right", max_width=210)
+draw_badge(img, (1085, food_box[3] - 30), 50, "Cost\nTracker", PEACH, font_size=15)
+
+bar_top = food_box[3] + 65
+trust_bar(img, (60, bar_top, 1140, bar_top + 110), [
+    (icon_sync, "Costs Roll Up\nTo Your Budget"),
+    (icon_download, "Instant\nDownload"),
+    (icon_spreadsheet, "Excel +\nGoogle Sheets"),
+])
 
 draw_close_icon(img)
 draw_pagination_dots(img, total=8, current=4)

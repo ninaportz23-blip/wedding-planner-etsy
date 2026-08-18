@@ -1,40 +1,39 @@
 # -*- coding: utf-8 -*-
 from marketing_lib import *
-from PIL import Image
 
 img = new_canvas()
-draw_background(img)
+draw_paper_background(img, seed=7)
 
-y = title_block(img, "See It All\nAt A Glance", "Live Dashboard + Smart Calendar", top=50,
-                 title_size=86, subtitle_size=26)
+eyebrow_bar(img, "GOOGLE SHEETS + EXCEL  |  FULLY AUTOMATED", top=44, icon_fn=icon_spreadsheet)
+accent_title(img, "All-in-one", "Wedding\nDashboard", top=118, script_size=46, title_size=80)
 
-MAIN_SS = "dashboard.png"
-main_size = load_screenshot(MAIN_SS).size
-main_crop = (0.0, 0.0, 1.0, 0.90)
-main_box = (150, 300, 1050, 1300)
-paste_device(img, MAIN_SS, main_box, bezel_color=WHITE, style="tablet", crop_box_frac=main_crop, bezel_width=16)
+LAPTOP_SS = "dashboard.png"
+laptop_box = (150, 460, 1050, 460 + (1050 - 150) / 1.6)
+meta = paste_laptop(img, LAPTOP_SS, laptop_box, crop_box_frac=(0.0, 0.0, 1.0, 0.90))
 
-CAL_SS = "smart-calendar.png"
-cal_size = load_screenshot(CAL_SS).size
-cal_crop = (0.0, 0.235, 1.0, 0.86)
-cal_box = (760, 1040, 1140, 1360)
-paste_device(img, CAL_SS, cal_box, bezel_color=CHARCOAL, style="phone", crop_box_frac=cal_crop, bezel_width=14)
-
-draw_badge(img, (185, 1340), 74, "Fully\nAutomated", LAVENDER, font_size=23)
-
-callouts = [
-    ((10, 300, 260, 400), "**Live countdown** ticks down to your wedding day", (0.34, 0.145), "right"),
-    ((10, 640, 270, 750), "**Checklist progress** updates as you check off tasks", (0.10, 0.55), "right"),
-    ((950, 300, 1195, 400), "**Budget snapshot** from your Budget tab", (0.66, 0.25), "left"),
-    ((950, 640, 1195, 760), "**RSVP tracker** synced with your Guest List", (0.60, 0.55), "left"),
+labels = [
+    ("Live Budget Tracker", BLUSH),
+    ("Guest + RSVP Sync", SAGE),
+    ("Checklist Progress", POWDER),
+    ("Smart Calendar", CREAM),
+    ("Fully Automated", PEACH),
 ]
-for bubble, text, target_frac, side in callouts:
-    target = frac_to_canvas(main_box, 16, main_crop, main_size, target_frac)
-    draw_callout(img, bubble, text, target, connector_from=side, font_size=21)
+lx = laptop_box[0] + (laptop_box[2] - laptop_box[0]) * 0.60
+ly = laptop_box[1] + 60
+for text, color in labels:
+    pill_label(img, (lx, ly), text, color, font_size=22, pad_x=24, pad_y=13)
+    ly += 62
 
-cal_target = frac_to_canvas(cal_box, 14, cal_crop, cal_size, (0.5, 0.92))
-draw_callout(img, (770, 1400, 1140, 1490), "**Smart Calendar** auto-fills every due date",
-             cal_target, connector_from="top", font_size=21)
+draw_badge(img, (940, 985), 58, "33\nTABS", CHARCOAL, text_color=WHITE, font_size=22)
+draw_badge(img, (1055, 940), 50, "Easy To\nUse", WHITE, text_color=CHARCOAL, font_size=16)
+
+bar_top = 1300
+trust_bar(img, (60, bar_top, 1140, bar_top + 130), [
+    (icon_play, "Video Tutorial\nIncluded"),
+    (icon_stars_row, "Made For Real\nWedding Planning"),
+    (icon_sync, "Smart\nAutomation"),
+    (icon_download, "Instant\nDownload"),
+])
 
 draw_close_icon(img)
 draw_pagination_dots(img, total=8, current=1)

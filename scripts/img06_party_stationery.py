@@ -1,55 +1,45 @@
 # -*- coding: utf-8 -*-
 from marketing_lib import *
-from PIL import ImageDraw
 
 img = new_canvas()
-draw_background(img, seed=52)
+draw_paper_background(img, seed=52)
 
-title_block(img, "Every Detail,\nOne Home Base", "Wedding Party + Stationery + Logistics", top=54,
-            title_size=66, subtitle_size=24)
+accent_title(img, "Every Detail", "One Home Base", top=60, script_size=40, title_size=72)
+draw_centered_multiline(img, (CANVAS_W / 2, 200), "WEDDING PARTY + STATIONERY + LOGISTICS", font("sans_bold", 22),
+                         MUTED_GREY, 1000)
 
 frames = [
-    ("wedding-party.png", (0.0, 0.0, 0.62, 0.62), "WEDDING PARTY",
-     "Track roles, attire, and who's confirmed", LAVENDER),
-    ("stationery.png", (0.0, 0.0, 0.55, 0.6), "STATIONERY",
-     "Design and print status, piece by piece", CREAM),
-    ("transportation.png", (0.0, 0.0, 0.72, 0.62), "LOGISTICS",
-     "Hotel blocks and transportation in one spot", POWDER),
+    ("wedding-party.png", "WEDDING PARTY", "Track roles, attire, and who's confirmed", LAVENDER),
+    ("stationery.png", "STATIONERY", "Design and print status, piece by piece", CREAM),
+    ("transportation.png", "LOGISTICS", "Hotel blocks and transportation, together", POWDER),
 ]
 
-gap = 30
-fw = (1200 - 2 * 60 - 2 * gap) / 3
-x0 = 60
-y0 = 310
-fh = 560
+gap = 34
+fw = (1200 - 2 * 70 - 2 * gap) / 3
+fh = fw / 1.35
+x0 = 70
+y0 = 300
 
-draw = ImageDraw.Draw(img, "RGBA")
-for i, (ss, crop, label, caption, color) in enumerate(frames):
+metas = []
+for i, (ss, label, caption, color) in enumerate(frames):
     bx0 = x0 + i * (fw + gap)
     box = (bx0, y0, bx0 + fw, y0 + fh)
-    paste_device(img, ss, box, bezel_color=WHITE, style="tablet", crop_box_frac=crop, bezel_width=12)
-
-    chip_w, chip_h = fw * 0.72, 40
-    chip_x = bx0 + (fw - chip_w) / 2
-    chip_y = y0 - 22
-    rounded_rect(draw, [chip_x, chip_y, chip_x + chip_w, chip_y + chip_h], radius=20, fill=color)
-    f_chip = font("sans_extrabold", 18)
-    tw, th = text_size(draw, label, f_chip)
-    draw.text((chip_x + chip_w / 2 - tw / 2, chip_y + chip_h / 2 - th / 2 - 2), label, font=f_chip, fill=CHARCOAL)
-
-    cap_y = y0 + fh + 34
-    draw_centered_multiline(img, (bx0 + fw / 2, cap_y), caption, font("sans_semibold", 21), CHARCOAL, fw - 10,
+    meta = paste_tablet(img, ss, box, crop_box_frac=(0.0, 0.0, 1.0, 1.0), bezel_color=WHITE)
+    metas.append(meta)
+    pill_label(img, (bx0 + fw / 2, y0 - 6), label, color, font_size=17, pad_x=16, pad_y=8)
+    cap_y = y0 + fh + 32
+    draw_centered_multiline(img, (bx0 + fw / 2, cap_y), caption, font("sans_semibold", 20), CHARCOAL, fw - 16,
                              line_spacing=1.25)
 
-# ---- summary panel filling the remaining canvas ----
-panel_box = (110, 1150, 1090, 1490)
+panel_box = (110, y0 + fh + 150, 1090, y0 + fh + 150 + 430)
+draw = ImageDraw.Draw(img, "RGBA")
 shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
 sd = ImageDraw.Draw(shadow)
-sd.rounded_rectangle([panel_box[0], panel_box[1] + 10, panel_box[2], panel_box[3] + 10], radius=34, fill=(20, 16, 30, 45))
+sd.rounded_rectangle([panel_box[0], panel_box[1] + 10, panel_box[2], panel_box[3] + 10], radius=28, fill=(15, 12, 22, 45))
 shadow = shadow.filter(ImageFilter.GaussianBlur(20))
-img.paste(Image.alpha_composite(img.convert("RGB").convert("RGBA"), shadow).convert("RGB"), (0, 0))
+img.paste(Image.alpha_composite(img.convert("RGBA"), shadow).convert("RGB"), (0, 0))
 draw = ImageDraw.Draw(img, "RGBA")
-rounded_rect(draw, panel_box, radius=34, fill=WHITE, outline=(224, 219, 213), width=2)
+rounded_rect(draw, panel_box, radius=28, fill=(255, 255, 255, 245), outline=(224, 219, 213), width=1)
 
 bullets = [
     "**Wedding party roles sync** with your Guest List automatically",
@@ -57,16 +47,23 @@ bullets = [
     "**Every logistics detail** lives in the same file as everything else",
 ]
 bx = panel_box[0] + 55
-by = panel_box[1] + 48
-row_h = 94
+by = panel_box[1] + 55
+row_h = 108
 for text in bullets:
-    r = 18
+    r = 19
     cy = by + r
     draw.ellipse([bx - r, cy - r, bx + r, cy + r], fill=CHARCOAL)
     draw.line([(bx - 9, cy + 1), (bx - 2, cy + 8), (bx + 10, cy - 9)], fill=WHITE, width=5, joint="curve")
-    draw_rich_paragraph(img, (bx + 42, by - 8), text, font("sans_semibold", 24), font("sans_extrabold", 24),
-                         CHARCOAL, panel_box[2] - (bx + 42) - 45, line_spacing=1.3)
+    draw_rich_paragraph(img, (bx + 44, by - 6), text, font("sans_semibold", 25), font("sans_extrabold", 25),
+                         CHARCOAL, panel_box[2] - (bx + 44) - 45, line_spacing=1.3)
     by += row_h
+
+bar_top = panel_box[3] + 65
+trust_bar(img, (60, bar_top, 1140, bar_top + 110), [
+    (icon_sync, "Everything\nStays In Sync"),
+    (icon_download, "Instant\nDownload"),
+    (icon_spreadsheet, "Excel +\nGoogle Sheets"),
+])
 
 draw_close_icon(img)
 draw_pagination_dots(img, total=8, current=6)

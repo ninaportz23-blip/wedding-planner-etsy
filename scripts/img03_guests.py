@@ -2,39 +2,42 @@
 from marketing_lib import *
 
 img = new_canvas()
-draw_background(img, seed=21)
+draw_paper_background(img, seed=21)
 
-title_block(img, "Guests And Seating,\nSorted Automatically", "Guest List + Seating Plan", top=50,
-            title_size=72, subtitle_size=26)
+accent_title(img, "Never Lose Track Of", "Guests & Seating", top=64, script_size=40, title_size=70)
+draw_centered_multiline(img, (CANVAS_W / 2, 210), "GUEST LIST + SEATING PLAN", font("sans_bold", 24),
+                         MUTED_GREY, 1000)
 
-MAIN_SS = "guest-list.png"
-main_size = load_screenshot(MAIN_SS).size
-main_crop = (0.0, 0.0, 1.0, 0.42)
-main_box = (150, 300, 1050, 1120)
-paste_device(img, MAIN_SS, main_box, bezel_color=WHITE, style="tablet", crop_box_frac=main_crop, bezel_width=16)
+GUEST_SS = "guest-list.png"
+guest_box = (170, 290, 1030, 290 + (1030 - 170) / 1.6)
+guest_meta = paste_laptop(img, GUEST_SS, guest_box, crop_box_frac=(0.0, 0.0, 1.0, 0.88))
+pill_label(img, (280, guest_box[1] - 6), "GUEST LIST", BLUSH, font_size=20, pad_x=20, pad_y=10)
 
 SEAT_SS = "seating-plan.png"
-seat_size = load_screenshot(SEAT_SS).size
-seat_crop = (0.0, 0.44, 0.56, 0.80)
-seat_box = (700, 1060, 1150, 1370)
-paste_device(img, SEAT_SS, seat_box, bezel_color=CHARCOAL, style="tablet", crop_box_frac=seat_crop, bezel_width=14)
+seat_w = 520
+seat_box = (520, guest_box[3] + 70, 520 + seat_w, guest_box[3] + 70 + seat_w / 1.38)
+seat_meta = paste_tablet(img, SEAT_SS, seat_box, crop_box_frac=(0.0, 0.0, 1.0, 1.0), bezel_color=WHITE)
+pill_label(img, (seat_box[0] + 95, seat_box[1] - 6), "SEATING PLAN", SAGE, font_size=18, pad_x=18, pad_y=9)
 
-draw_badge(img, (170, 1220), 82, "Up To\n1,000 Guests", BLUSH, font_size=22)
-draw_badge(img, (215, 1380), 60, "Unique\nFeature", SAGE, font_size=17)
+thin_callout(img, (60, guest_box[1] + 55), "**Visual dashboard** with live RSVP and meal counts",
+             frame_target(guest_meta, (0.06, 0.10)), align="left", max_width=210)
+thin_callout(img, (1060, guest_box[1] + 55), "**Meal preferences** roll up into a chart automatically",
+             frame_target(guest_meta, (0.86, 0.10)), align="right", max_width=210)
+thin_callout(img, (60, guest_box[1] + 300), "**Track RSVPs** for every single guest, Yes / No / Awaited",
+             frame_target(guest_meta, (0.30, 0.24)), align="left", max_width=220)
 
-callouts = [
-    ((10, 300, 260, 410), "**Visual guest dashboard** with live RSVP and meal counts", (0.30, 0.06), "right"),
-    ((10, 640, 270, 760), "**Track RSVPs and meal preferences** for every single guest", (0.35, 0.28), "right"),
-    ((950, 300, 1195, 420), "**Rehearsal dinner list** builds itself from your RSVPs", (0.55, 0.14), "left"),
-]
-for bubble, text, target_frac, side in callouts:
-    target = frac_to_canvas(main_box, 16, main_crop, main_size, target_frac)
-    draw_callout(img, bubble, text, target, connector_from=side, font_size=21)
+draw_badge(img, (110, guest_box[3] - 40), 56, "Up To\n1,000 Guests", BLUSH, font_size=15)
 
-seat_target = frac_to_canvas(seat_box, 14, seat_crop, seat_size, (0.5, 0.06))
-draw_callout(img, (700, 1400, 1170, 1500),
-             "**Smart Seating** automatically groups couples and families at the same table",
-             seat_target, connector_from="top", font_size=20)
+thin_callout(img, (1060, seat_box[1] + 40), "**Smart Seating** groups couples and families at the same table",
+             frame_target(seat_meta, (0.30, 0.55)), align="right", max_width=210)
+draw_badge(img, (1085, seat_box[3] - 30), 50, "Unique\nFeature", SAGE, font_size=15)
+
+bar_top = seat_box[3] + 65
+trust_bar(img, (60, bar_top, 1140, bar_top + 110), [
+    (icon_sync, "RSVPs Sync\nAutomatically"),
+    (icon_download, "Instant\nDownload"),
+    (icon_spreadsheet, "Excel +\nGoogle Sheets"),
+])
 
 draw_close_icon(img)
 draw_pagination_dots(img, total=8, current=3)
