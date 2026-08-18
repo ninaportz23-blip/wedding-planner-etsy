@@ -64,8 +64,23 @@ def build_transportation(wb, dv_named):
     first = hdr
     n = 20
     last = first + n - 1
+    trans_sample = [
+        ("Bridal Party", "Elegant Limo Co.", "555-0200", "Bridal Suite Hotel", "Willow Creek Barn", "8-seater stretch"),
+        ("Guest Shuttle", "City Coach Lines", "555-0210", "Downtown Hotel", "Willow Creek Barn", "Two return trips"),
+        ("Family", "Elegant Limo Co.", "555-0200", "Family Home", "Willow Creek Barn", "Grandparents"),
+        ("Couple Getaway", "Classic Car Hire", "555-0220", "Willow Creek Barn", "The Grand Hotel", "Vintage car"),
+    ]
     for i in range(n):
         r = first + i
+        if i < len(trans_sample):
+            tfor, vname, vcontact, pu, do, note = trans_sample[i]
+            ws.cell(row=r, column=1, value=tfor)
+            ws.cell(row=r, column=2, value=vname)
+            ws.cell(row=r, column=3, value=vcontact)
+            ws.cell(row=r, column=4, value=pu)
+            ws.cell(row=r, column=5, value=do)
+            ws.cell(row=r, column=6, value="='Get Started'!$C$4")
+            ws.cell(row=r, column=8, value=note)
         ws.cell(row=r, column=6).number_format = DATE_FMT
         ws.cell(row=r, column=7).number_format = "HH:MM"
         for cc in range(1, 9):

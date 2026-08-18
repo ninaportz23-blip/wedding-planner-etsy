@@ -195,8 +195,22 @@ def build_attire_makeup(wb, dv_named):
     first1 = hdr1
     n1 = 10
     last1 = first1 + n1 - 1
+    attire_sample = [
+        ("Wedding Day", "Bride", "Dress", "Alterations booked for May"),
+        ("Wedding Day", "Bride", "Hair & Makeup", "Trial done, loved it"),
+        ("Wedding Day", "Groom", "Suit", "Navy three-piece, ordered"),
+        ("Wedding Day", "Bridesmaids", "Dress", "Sage green, all sizes in"),
+        ("Wedding Day", "Groomsmen", "Suit", "Rental, pickup week before"),
+        ("Rehearsal Dinner", "Bride", "Outfit", "White jumpsuit"),
+    ]
     for i in range(n1):
         r = first1 + i
+        if i < len(attire_sample):
+            ev, person, cat, note = attire_sample[i]
+            ws.cell(row=r, column=1, value=ev)
+            ws.cell(row=r, column=2, value=person)
+            ws.cell(row=r, column=3, value=cat)
+            ws.cell(row=r, column=4, value=note)
         for cc in range(1, 5):
             ws.cell(row=r, column=cc).border = BORDER_ALL
             ws.cell(row=r, column=cc).font = f_body()

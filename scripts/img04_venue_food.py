@@ -10,13 +10,13 @@ draw_centered_multiline(img, (CANVAS_W / 2, 210), "VENUE COMPARISON + FOOD & DRI
 
 VEN_SS = "venue-comparison.png"
 venue_box = (170, 290, 1030, 290 + (1030 - 170) / 1.6)
-venue_meta = paste_laptop(img, VEN_SS, venue_box, crop_box_frac=(0.0, 0.0, 1.0, 0.88))
+venue_meta = paste_laptop(img, VEN_SS, venue_box, crop_box_frac=(0.0, 0.0, 1.0, 0.56))
 pill_label(img, (300, venue_box[1] - 6), "VENUE COMPARISON", LAVENDER, font_size=20, pad_x=20, pad_y=10)
 
 FOOD_SS = "food-drinks.png"
 food_w = 520
 food_box = (520, venue_box[3] + 70, 520 + food_w, venue_box[3] + 70 + food_w / 1.38)
-food_meta = paste_tablet(img, FOOD_SS, food_box, crop_box_frac=(0.0, 0.0, 1.0, 1.0), bezel_color=WHITE)
+food_meta = paste_tablet(img, FOOD_SS, food_box, crop_box_frac=(0.0, 0.0, 0.55, 0.74), bezel_color=WHITE)
 pill_label(img, (food_box[0] + 90, food_box[1] - 6), "FOOD & DRINKS", PEACH, font_size=18, pad_x=18, pad_y=9)
 
 thin_callout(img, (60, venue_box[1] + 55), "**Compare up to 5 venues** side by side on fees and capacity",

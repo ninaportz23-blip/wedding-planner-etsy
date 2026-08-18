@@ -9,10 +9,10 @@ draw_centered_multiline(img, (CANVAS_W / 2, 200), "MOODBOARD + DECOR + FLOWERS +
                          MUTED_GREY, 1000)
 
 items = [
-    ("moodboard.png", "Moodboard", "Pin every inspiration image in one place", BLUSH),
-    ("decor.png", "Decor Inventory", "Track cost and status for every rented piece", SAGE),
-    ("flowers.png", "Flower Arrangements", "Every bouquet and centerpiece, costed out", PEACH),
-    ("attire-makeup.png", "Attire & Makeup", "Looks organized by event and by person", LAVENDER),
+    ("moodboard.png", "Moodboard", "Pin every inspiration image in one place", BLUSH, (0.0, 0.0, 1.0, 0.82)),
+    ("decor.png", "Decor Inventory", "Track cost and status for every rented piece", SAGE, (0.0, 0.0, 0.60, 0.56)),
+    ("flowers.png", "Flower Arrangements", "Every bouquet and centerpiece, costed out", PEACH, (0.0, 0.0, 0.60, 0.56)),
+    ("attire-makeup.png", "Attire & Makeup", "Looks organized by event and by person", LAVENDER, (0.0, 0.0, 0.9, 0.62)),
 ]
 
 gap = 40
@@ -21,13 +21,13 @@ fh = fw / 1.35
 x0 = 80
 y_rows = [300, 300 + fh + 120]
 
-for i, (ss, label, caption, color) in enumerate(items):
+for i, (ss, label, caption, color, crop) in enumerate(items):
     col = i % 2
     row = i // 2
     bx0 = x0 + col * (fw + gap)
     by0 = y_rows[row]
     box = (bx0, by0, bx0 + fw, by0 + fh)
-    paste_tablet(img, ss, box, crop_box_frac=(0.0, 0.0, 1.0, 1.0), bezel_color=WHITE)
+    paste_tablet(img, ss, box, crop_box_frac=crop, bezel_color=WHITE)
     pill_label(img, (bx0 + fw / 2, by0 - 6), label, color, font_size=18, pad_x=18, pad_y=9)
     cap_y = by0 + fh + 28
     draw_centered_multiline(img, (bx0 + fw / 2, cap_y), caption, font("sans_semibold", 20), CHARCOAL, fw - 20,

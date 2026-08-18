@@ -11,13 +11,14 @@ draw_centered_multiline(img, (CANVAS_W / 2, 210), "WEDDING BUDGET + VENDOR RESEA
 
 BUDGET_SS = "budget.png"
 budget_box = (170, 290, 1030, 290 + (1030 - 170) / 1.6)
-budget_meta = paste_laptop(img, BUDGET_SS, budget_box, crop_box_frac=(0.0, 0.0, 1.0, 0.88))
+# crop to the filled tables on the left (skip the far-right chart / empty space)
+budget_meta = paste_laptop(img, BUDGET_SS, budget_box, crop_box_frac=(0.0, 0.0, 0.56, 0.80))
 pill_label(img, (300, budget_box[1] - 6), "WEDDING BUDGET", BLUSH, font_size=20, pad_x=20, pad_y=10)
 
 VEN_SS = "vendor-selection.png"
 ven_w = 520
 ven_box = (520, budget_box[3] + 70, 520 + ven_w, budget_box[3] + 70 + ven_w / 1.38)
-ven_meta = paste_tablet(img, VEN_SS, ven_box, crop_box_frac=(0.0, 0.0, 1.0, 1.0), bezel_color=WHITE)
+ven_meta = paste_tablet(img, VEN_SS, ven_box, crop_box_frac=(0.0, 0.0, 0.54, 0.95), bezel_color=WHITE)
 pill_label(img, (ven_box[0] + 90, ven_box[1] - 6), "VENDOR RESEARCH", SAGE, font_size=18, pad_x=18, pad_y=9)
 
 # thin callouts on the budget laptop

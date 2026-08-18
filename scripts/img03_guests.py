@@ -10,21 +10,22 @@ draw_centered_multiline(img, (CANVAS_W / 2, 210), "GUEST LIST + SEATING PLAN", f
 
 GUEST_SS = "guest-list.png"
 guest_box = (170, 290, 1030, 290 + (1030 - 170) / 1.6)
-guest_meta = paste_laptop(img, GUEST_SS, guest_box, crop_box_frac=(0.0, 0.0, 1.0, 0.88))
+# crop to the filled KPIs + guest rows + the Guest-Of chart (skip empty rows)
+guest_meta = paste_laptop(img, GUEST_SS, guest_box, crop_box_frac=(0.0, 0.0, 0.82, 0.52))
 pill_label(img, (280, guest_box[1] - 6), "GUEST LIST", BLUSH, font_size=20, pad_x=20, pad_y=10)
 
 SEAT_SS = "seating-plan.png"
 seat_w = 520
 seat_box = (520, guest_box[3] + 70, 520 + seat_w, guest_box[3] + 70 + seat_w / 1.38)
-seat_meta = paste_tablet(img, SEAT_SS, seat_box, crop_box_frac=(0.0, 0.0, 1.0, 1.0), bezel_color=WHITE)
+seat_meta = paste_tablet(img, SEAT_SS, seat_box, crop_box_frac=(0.0, 0.0, 0.62, 0.72), bezel_color=WHITE)
 pill_label(img, (seat_box[0] + 95, seat_box[1] - 6), "SEATING PLAN", SAGE, font_size=18, pad_x=18, pad_y=9)
 
 thin_callout(img, (60, guest_box[1] + 55), "**Visual dashboard** with live RSVP and meal counts",
-             frame_target(guest_meta, (0.06, 0.10)), align="left", max_width=210)
-thin_callout(img, (1060, guest_box[1] + 55), "**Meal preferences** roll up into a chart automatically",
-             frame_target(guest_meta, (0.86, 0.10)), align="right", max_width=210)
+             frame_target(guest_meta, (0.06, 0.12)), align="left", max_width=210)
+thin_callout(img, (1060, guest_box[1] + 70), "**Meal preferences** tracked and counted for every guest",
+             frame_target(guest_meta, (0.52, 0.22)), align="right", max_width=210)
 thin_callout(img, (60, guest_box[1] + 300), "**Track RSVPs** for every single guest, Yes / No / Awaited",
-             frame_target(guest_meta, (0.30, 0.24)), align="left", max_width=220)
+             frame_target(guest_meta, (0.36, 0.42)), align="left", max_width=220)
 
 draw_badge(img, (110, guest_box[3] - 40), 56, "Up To\n1,000 Guests", BLUSH, font_size=15)
 

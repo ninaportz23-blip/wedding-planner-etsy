@@ -58,6 +58,27 @@ def build_venue_comparison(wb):
         wcell.alignment = CENTER
     ws.conditional_formatting.add(f"B{winner_row}:F{winner_row}",
         FormulaRule(formula=[f'B{winner_row}<>""'], fill=fill(STATUS_GREEN)))
+    # sample data for three venues so the comparison shows a filled example
+    sample = {
+        "Name": ["Willow Creek Barn", "The Grand Hall", "Seaside Terrace"],
+        "Contact Info": ["555-0101", "555-0180", "555-0199"],
+        "Capacity": [200, 150, 120],
+        "Availability": ["Available", "Available", "Waitlist"],
+        "Venue Fee": [8500, 6000, 7200],
+        "Ceremony Fee": [500, 800, 0],
+        "Reception Fee": [0, 1200, 0],
+        "Setup Fee": [300, 250, 400],
+        "Cleanup Fee": [250, 200, 300],
+        "Service Charge": [1200, 900, 1100],
+        "Food and Drinks": [6500, 5200, 7000],
+        "Alcohol": [2000, 1500, 2200],
+        "Cake Cutting Fee": [150, 200, 0],
+    }
+    for idx, field in enumerate(fields):
+        if field in sample:
+            frow = header_row + 1 + idx
+            for v, val in enumerate(sample[field]):
+                ws.cell(row=frow, column=2 + v, value=val)
     set_col_widths(ws, {"A": 18, "B": 18, "C": 18, "D": 18, "E": 18, "F": 18})
     freeze_header(ws, header_row + 1)
 

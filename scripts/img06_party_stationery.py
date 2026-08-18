@@ -9,9 +9,9 @@ draw_centered_multiline(img, (CANVAS_W / 2, 200), "WEDDING PARTY + STATIONERY + 
                          MUTED_GREY, 1000)
 
 frames = [
-    ("wedding-party.png", "WEDDING PARTY", "Track roles, attire, and who's confirmed", LAVENDER),
-    ("stationery.png", "STATIONERY", "Design and print status, piece by piece", CREAM),
-    ("transportation.png", "LOGISTICS", "Hotel blocks and transportation, together", POWDER),
+    ("wedding-party.png", "WEDDING PARTY", "Track roles, attire, and who's confirmed", LAVENDER, (0.0, 0.0, 0.74, 0.64)),
+    ("stationery.png", "STATIONERY", "Design and print status, piece by piece", CREAM, (0.0, 0.0, 0.56, 0.50)),
+    ("transportation.png", "LOGISTICS", "Hotel blocks and transportation, together", POWDER, (0.0, 0.0, 0.98, 0.60)),
 ]
 
 gap = 34
@@ -21,10 +21,10 @@ x0 = 70
 y0 = 300
 
 metas = []
-for i, (ss, label, caption, color) in enumerate(frames):
+for i, (ss, label, caption, color, crop) in enumerate(frames):
     bx0 = x0 + i * (fw + gap)
     box = (bx0, y0, bx0 + fw, y0 + fh)
-    meta = paste_tablet(img, ss, box, crop_box_frac=(0.0, 0.0, 1.0, 1.0), bezel_color=WHITE)
+    meta = paste_tablet(img, ss, box, crop_box_frac=crop, bezel_color=WHITE)
     metas.append(meta)
     pill_label(img, (bx0 + fw / 2, y0 - 6), label, color, font_size=17, pad_x=16, pad_y=8)
     cap_y = y0 + fh + 32
