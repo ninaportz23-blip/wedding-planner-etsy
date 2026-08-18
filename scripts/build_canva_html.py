@@ -5,7 +5,9 @@ pills, badges, and callouts stay as separate text/shape layers; only the
 spreadsheet tab screenshots themselves are images."""
 import re
 
-GH = "https://raw.githubusercontent.com/ninaportz23-blip/wedding-planner-etsy/claude/wedding-planner-etsy-ek5s5p/qa_screens/"
+# Pin to a commit SHA so Canva always fetches the current screenshots
+# (branch-based raw URLs can be served stale from the CDN).
+GH = "https://raw.githubusercontent.com/ninaportz23-blip/wedding-planner-etsy/7a96a42bf2dd7ae1c419163d19e5e5b5f3e57c96/qa_screens/"
 
 LAVENDER = "#D8D3F0"
 BLUSH = "#F6D9DE"
@@ -50,7 +52,7 @@ class Page:
         x0, y0, x1, y1 = box
         w, h = x1 - x0, y1 - y0
         self.els.append(f'''<div class="laptop" style="top:{y0}px;left:{x0}px;width:{w}px;height:{h}px;">
-      <img src="{GH}{img_name}" style="object-position: top center; object-fit: cover;">
+      <img src="{GH}{img_name}" style="object-position: top left; object-fit: cover;">
     </div>
     <div class="deck" style="top:{y1}px;left:{x0-40}px;width:{w+80}px;"></div>''')
         return box
@@ -59,7 +61,7 @@ class Page:
         x0, y0, x1, y1 = box
         w, h = x1 - x0, y1 - y0
         self.els.append(f'''<div class="tablet" style="top:{y0}px;left:{x0}px;width:{w}px;height:{h}px;">
-      <img src="{GH}{img_name}" style="object-position: top center; object-fit: cover;">
+      <img src="{GH}{img_name}" style="object-position: top left; object-fit: cover;">
     </div>''')
         return box
 
@@ -258,7 +260,7 @@ sbox = (520, gbox[3] + 70, 520 + 520, gbox[3] + 70 + 520 / 1.38)
 p.tablet("seating-plan.png", sbox)
 p.pill("SEATING PLAN", sbox[0] + 95, sbox[1] - 28, SAGE, 18)
 p.callout("**Visual dashboard** with live RSVP and meal counts", (60, gbox[1] + 55), (gbox[0] + 60, gbox[1] + 140), "left")
-p.callout("**Meal preferences** roll up into a chart automatically", (1060, gbox[1] + 55), (gbox[0] + 730, gbox[1] + 140), "right")
+p.callout("**Meal preferences** tracked and counted for every guest", (1060, gbox[1] + 55), (gbox[0] + 430, gbox[1] + 120), "right")
 p.callout("**Track RSVPs** for every single guest, Yes / No / Awaited", (60, gbox[1] + 300), (gbox[0] + 260, gbox[1] + 210), "left")
 p.badge("Up To\n1,000 Guests", 110, gbox[3] - 40, 56, BLUSH, CHARCOAL, 14)
 p.callout("**Smart Seating** groups couples and families at the same table", (1060, sbox[1] + 40), (sbox[0] + 260, sbox[1] + 240), "right")
@@ -447,6 +449,6 @@ html = f"""<title>Wedding Planner Etsy Listing Images</title>
 {body}
 """
 
-with open("/home/user/wedding-planner-etsy/canva-import/all-8-images.html", "w") as f:
+with open("/home/user/wedding-planner-etsy/canva-import/all-8-images-v3.html", "w") as f:
     f.write(html)
 print("Wrote", len(html), "bytes,", len(PAGES), "pages")
