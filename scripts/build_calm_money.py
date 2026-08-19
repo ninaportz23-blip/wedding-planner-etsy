@@ -27,6 +27,7 @@ from openpyxl.formatting.rule import CellIsRule, DataBarRule, FormulaRule
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.workbook.defined_name import DefinedName
 from openpyxl.worksheet.formula import ArrayFormula
+from openpyxl.utils import get_column_letter, column_index_from_string
 
 warnings.filterwarnings("ignore")
 
@@ -263,6 +264,8 @@ def build(wb):
     ws_reflect = build_reflection(wb)
 
     finalize(wb, ws_dash, ws_doom, ws_streak, ws_pause, ws_reflect)
+    polish(wb)
+    print("  polished legacy tabs for consistent widths / banners / spacing")
 
 
 # canonical sheet names (emoji tab names; referenced only through these consts)
@@ -427,7 +430,7 @@ def build_dashboard(wb):
         'MIN(IF((TransactionsLog[Type]="Bill")*'
         '(TransactionsLog[Date]>=TODAY()),TransactionsLog[Date],""))-TODAY()),'
         '"None")')
-    ws["F5"] = f"=IFERROR({q(S_STREAK)}!$F$5,0)"
+    ws["F5"] = f"=IFERROR({q(S_STREAK)}!$B$7,0)"
 
     # progress section
     section(ws, "A8", "Your progress", fill=SAGE)
@@ -620,91 +623,90 @@ def build_streak(wb):
     ws = wb.create_sheet(S_STREAK)
     ws.sheet_view.showGridLines = False
     ws.sheet_properties.tabColor = TAB_COLORS[S_STREAK]
-    _widths(ws, {"A": 4, "B": 8, "C": 8, "D": 8, "E": 8, "F": 8, "G": 8,
-                 "H": 8, "I": 3})
+    _widths(ws, {"A": 3, "B": 12, "C": 12, "D": 12, "E": 12, "F": 12, "G": 12,
+                 "H": 12, "I": 3})
     for col in ("K", "L", "M", "N"):
         ws.column_dimensions[col].hidden = True
 
-    banner(ws, "A1:H1", "🌱 Low-Spend Streak Tracker", fill=SAGE, size=22)
+    banner(ws, "A1:H1", "Low-Spend Streak Tracker", fill=BLUSH, size=24, height=48)
     subtitle(ws, "A2:H2",
-             "Every no-spend (or low-spend) day is a win. Mark a ✓ and watch "
+             "Every no-spend (or low-spend) day is a win. Mark a check and watch "
              "your streak grow. Miss a day? You just start a fresh one. That's it.")
-    ws.row_dimensions[2].height = 30
+    ws.row_dimensions[2].height = 40
 
-    # month / year selectors
-    label(ws, "A4", "Month", bold=True)
-    input_cell(ws, "B4", fill=CREAM, align="left")
-    ws["B4"] = "January"
-    label(ws, "C4", "Year", bold=True)
-    input_cell(ws, "D4", fill=CREAM, align="left")
-    ws["D4"] = 2026
-    _add_dv(ws, "MonthList", "B4")
-    _add_dv(ws, "YearList", "D4")
+    # month / year selectors (row 4)
+    label(ws, "B4", "Month", bold=True, align="right")
+    ws.merge_cells("C4:D4")
+    input_cell(ws, "C4", fill=CREAM, align="left")
+    ws["C4"] = "January"
+    label(ws, "F4", "Year", bold=True, align="right")
+    input_cell(ws, "G4", fill=CREAM, align="left")
+    ws["G4"] = 2026
+    _add_dv(ws, "MonthList", "C4")
+    _add_dv(ws, "YearList", "G4")
 
-    # streak summary cards (right)
-    for first, lab, fill in [("F4", "Current streak", BLUSH_SOFT),
-                             ("H4", "Longest this month", SAGE_SOFT)]:
-        col = "".join(filter(str.isalpha, first))
-        ws.merge_cells(f"{col}4:{col}4")
-        ws[f"{col}4"] = lab
-        ws[f"{col}4"].font = Font(name=HEAD, size=9.5, bold=True, color=MUTED)
-        ws[f"{col}4"].alignment = Alignment(horizontal="center", vertical="center",
-                                            wrap_text=True)
-        ws[f"{col}5"].fill = solid(fill)
-        ws[f"{col}4"].fill = solid(fill)
-        ws[f"{col}5"].font = Font(name=TITLE, size=20, bold=True, color=CHARCOAL)
-        ws[f"{col}5"].alignment = Alignment(horizontal="center", vertical="center")
-        ws[f"{col}5"].number_format = '0" d"'
-        ws[f"{col}4"].border = NBORDER
-        ws[f"{col}5"].border = NBORDER
-    ws.row_dimensions[4].height = 22
-    ws.row_dimensions[5].height = 26
+    # helper cells (hidden)
+    ws["L1"] = "=MATCH($C$4,MonthList,0)"
+    ws["L2"] = "=DAY(EOMONTH(DATE($G$4,$L$1,1),0))"
+    ws["L3"] = ("=IF(AND($L$1=MONTH(TODAY()),$G$4=YEAR(TODAY())),"
+                "DAY(TODAY()),$L$2)")
 
-    # helper cells
-    ws["L1"] = "=MATCH($B$4,MonthList,0)"            # month number
-    ws["L2"] = "=DAY(EOMONTH(DATE($D$4,$L$1,1),0))"  # days in month
-    ws["L3"] = ("=IF(AND($L$1=MONTH(TODAY()),$D$4=YEAR(TODAY())),"
-                "DAY(TODAY()),$L$2)")                # current index
+    # two summary cards (rows 6-7), Dashboard style
+    def streak_card(lrng, vrng, lab, fill):
+        ws.merge_cells(lrng)
+        lc = ws[lrng.split(":")[0]]
+        lc.value = lab
+        lc.font = Font(name=HEAD, size=11, bold=True, color=MUTED)
+        lc.alignment = Alignment(horizontal="center", vertical="center")
+        ws.merge_cells(vrng)
+        vc = ws[vrng.split(":")[0]]
+        vc.font = Font(name=TITLE, size=26, bold=True, color=CHARCOAL)
+        vc.alignment = Alignment(horizontal="center", vertical="center")
+        vc.number_format = '0" days"'
+        for rng in (lrng, vrng):
+            for cc in ws[rng][0]:
+                cc.fill = solid(fill)
+                cc.border = NBORDER
 
-    # calendar-style check grid: 5 pairs (label row / check row), 7 wide
+    streak_card("B6:D6", "B7:D7", "CURRENT STREAK", BLUSH_SOFT)
+    streak_card("F6:H6", "F7:H7", "LONGEST THIS MONTH", SAGE_SOFT)
+    ws["B7"] = "=INDEX($M$6:$M$36,$L$3)"
+    ws["F7"] = "=MAX($M$6:$M$36)"
+    ws.row_dimensions[6].height = 20
+    ws.row_dimensions[7].height = 40
+
+    # calendar-style check grid: 5 label/check pairs, 7 wide (B..H)
     def check_coord(day):
         pair = (day - 1) // 7
         idx = (day - 1) % 7
-        row = 9 + pair * 3      # check row
-        col = chr(66 + idx)     # B..H
-        return col, row
+        return chr(66 + idx), 11 + pair * 3   # (col, check row)
 
-    section(ws, "A7", "Mark a ✓ on every low-spend day", fill=SKY)
-    ws.merge_cells("A7:H7")
-    ws.row_dimensions[7].height = 24
+    section(ws, "A9", "Mark a check on every low-spend day", fill=SKY)
+    ws.merge_cells("A9:H9")
+    ws.row_dimensions[9].height = 28
 
     for pair in range(5):
-        lrow = 8 + pair * 3
-        crow = 9 + pair * 3
+        lrow = 10 + pair * 3
+        crow = 11 + pair * 3
         for idx in range(7):
             day = pair * 7 + idx + 1
             col = chr(66 + idx)
             lc = ws[f"{col}{lrow}"]
             lc.value = f'=IF({day}<=$L$2,{day},"")'
-            lc.font = Font(name=HEAD, size=9, bold=True, color=MUTED)
-            lc.alignment = Alignment(horizontal="left", vertical="bottom", indent=1)
+            lc.font = Font(name=HEAD, size=10, bold=True, color=MUTED)
+            lc.alignment = Alignment(horizontal="center", vertical="bottom")
             cc = ws[f"{col}{crow}"]
             cc.fill = solid(CREAM)
-            cc.font = Font(name=BODY, size=14, bold=True, color="FF7BA87A")
+            cc.font = Font(name=BODY, size=16, bold=True, color="FF7BA87A")
             cc.alignment = Alignment(horizontal="center", vertical="center")
             cc.border = NBORDER
             cc.protection = Protection(locked=False)
-        ws.row_dimensions[lrow].height = 15
-        ws.row_dimensions[crow].height = 26
+        ws.row_dimensions[lrow].height = 18
+        ws.row_dimensions[crow].height = 34
 
-    # data validation + soft green fill for marked days
-    check_cells = []
-    for day in range(1, 32):
-        col, row = check_coord(day)
-        check_cells.append(f"{col}{row}")
-    # group into a single sqref
-    sqref = " ".join(check_cells)
-    _add_dv(ws, '"✓, "', sqref)
+    check_cells = [f"{check_coord(day)[0]}{check_coord(day)[1]}"
+                   for day in range(1, 32)]
+    _add_dv(ws, '"✓, "', " ".join(check_cells))
     for cell in check_cells:
         ws.conditional_formatting.add(
             cell, CellIsRule(operator="equal", formula=['"✓"'], fill=solid(SAGE)))
@@ -716,25 +718,21 @@ def build_streak(wb):
         ws[f"K{r}"] = day
         ws[f"L{r}"] = f"={col}{crow}"
         prev = "0" if day == 1 else f"M{r - 1}"
-        ws[f"M{r}"] = (f'=IF(AND({day}<=$L$2,L{r}="✓"),{prev}+1,0)')
-
-    # current / longest streak
-    ws["F5"] = "=INDEX($M$6:$M$36,$L$3)"
-    ws["H5"] = "=MAX($M$6:$M$36)"
+        ws[f"M{r}"] = f'=IF(AND({day}<=$L$2,L{r}="✓"),{prev}+1,0)'
 
     # milestone micro-copy
-    ws.merge_cells("A24:H24")
-    m = ws["A24"]
-    m.value = ('=IF($F$5>=30,"30 days. A whole month of showing up for '
-               'yourself. Incredible. 🌿",IF($F$5>=14,"Two weeks strong. Your '
-               'brain is learning a new pattern. Keep going. 💚",IF($F$5>=7,'
-               '"A full week. That is real momentum. Be proud. ✨",IF($F$5>=1,'
-               '"You have started a streak. One day at a time. 🌱",'
-               '"A fresh page. Mark today whenever you are ready. 🤍"))))')
+    ws.merge_cells("A26:H26")
+    m = ws["A26"]
+    m.value = ('=IF($B$7>=30,"30 days. A whole month of showing up for '
+               'yourself. Incredible.",IF($B$7>=14,"Two weeks strong. Your '
+               'brain is learning a new pattern. Keep going.",IF($B$7>=7,'
+               '"A full week. That is real momentum. Be proud.",IF($B$7>=1,'
+               '"You have started a streak. One day at a time.",'
+               '"A fresh page. Mark today whenever you are ready."))))')
     m.fill = solid(LAV_SOFT)
-    m.font = Font(name=BODY, size=11, italic=True, color=CHARCOAL)
+    m.font = Font(name=BODY, size=12, italic=True, color=CHARCOAL)
     m.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    ws.row_dimensions[24].height = 34
+    ws.row_dimensions[26].height = 40
 
     protect(ws)
     return ws
@@ -908,6 +906,209 @@ def build_reflection(wb):
 
     protect(ws)
     return ws
+
+
+# -------------------------------------------------------------------- polish ---
+import math as _math
+
+
+def _spanw(widths, a, b):
+    tot = 0
+    for ci in range(column_index_from_string(a), column_index_from_string(b) + 1):
+        tot += widths.get(get_column_letter(ci), 8.43)
+    return tot
+
+
+def _fit_h(text, wunits, size=10.5, minh=18):
+    cpl = max(8, int(wunits * 0.92 * (11.0 / size)))
+    lines = sum(max(1, _math.ceil(len(s) / cpl)) for s in str(text).split("\n"))
+    return max(minh, lines * int(round(size * 1.65)) + 8)
+
+
+def _rebanner(ws, span, title, height=46, size=23, fill=BLUSH):
+    a = f"A1:{span}1"
+    ws.merge_cells(a)
+    c = ws["A1"]
+    if title is not None:
+        c.value = title
+    c.fill = solid(fill)
+    c.font = Font(name=TITLE, size=size, bold=True, color=CHARCOAL)
+    c.alignment = Alignment(horizontal="left", vertical="center", indent=1)
+    for cc in ws[a][0]:
+        cc.fill = solid(fill)
+    ws.row_dimensions[1].height = height
+
+
+def _restyle_subtitle(ws, cellref, span, widths, size=10.5):
+    """Style an instruction row as a wrapped muted subtitle and fit its height."""
+    r = int("".join(filter(str.isdigit, cellref)))
+    a0 = cellref
+    a1 = f"{span}{r}"
+    rng = f"{a0}:{a1}"
+    # merge if not already
+    already = any(str(m) == rng or (m.min_row == r and m.max_row == r)
+                  for m in ws.merged_cells.ranges)
+    if not already:
+        try:
+            ws.merge_cells(rng)
+        except Exception:
+            pass
+    c = ws[a0]
+    c.font = Font(name=BODY, size=size, italic=True, color=MUTED)
+    c.alignment = Alignment(horizontal="left", vertical="center", indent=1,
+                            wrap_text=True)
+    col0 = "".join(filter(str.isalpha, a0))
+    ws.row_dimensions[r].height = _fit_h(c.value or "",
+                                         _spanw(widths, col0, span), size)
+
+
+def _band(ws, cellref, span, widths, fill=SAGE, size=12.5):
+    r = int("".join(filter(str.isdigit, cellref)))
+    col0 = "".join(filter(str.isalpha, cellref))
+    rng = f"{cellref}:{span}{r}"
+    already = any(m.min_row == r and m.min_col == column_index_from_string(col0)
+                  for m in ws.merged_cells.ranges)
+    if not already and col0 != span:
+        try:
+            ws.merge_cells(rng)
+        except Exception:
+            pass
+    c = ws[cellref]
+    c.fill = solid(fill)
+    c.font = Font(name=HEAD, size=size, bold=True, color=CHARCOAL)
+    c.alignment = Alignment(horizontal="left", vertical="center", indent=1)
+    for cc in ws[rng][0]:
+        cc.fill = solid(fill)
+    ws.row_dimensions[r].height = max(ws.row_dimensions[r].height or 0, 26)
+
+
+BUD_W = {"A": 27, "B": 12, "C": 12, "D": 18, "E": 11, "F": 3, "G": 12, "H": 12,
+         "I": 12, "J": 12, "K": 12, "L": 12, "M": 12}
+# section titles that share their row with column headers (B..E): band A only
+BUD_BANDS = [("A4", "B", SKY), ("D4", "E", SKY), ("A14", "A", SAGE),
+             ("A23", "A", SAGE), ("A35", "A", SAGE), ("A47", "A", SAGE),
+             ("A56", "A", SAGE), ("A65", "A", SAGE)]
+BUD_WRAP = [(14, 30, "B", "E"), (23, 30, "B", "E"), (35, 30, "B", "E"),
+            (47, 30, "B", "E"), (56, 30, "B", "E"), (70, 26, "A", "D")]
+
+POLISH = {
+    "🌸 Welcome": {"doc": True, "w": {"A": 116}, "banner": ("A", 52, 26),
+                   "title": "Calm Money Reset"},
+    "💬 Notes FAQ": {"doc": True, "w": {"A": 116}, "banner": ("A", 48, 24)},
+    "Flexible Income Budget": {"w": BUD_W, "banner": ("F", 46, 22),
+                               "sub": ("A2", "M"), "bands": BUD_BANDS,
+                               "wrap_rows": BUD_WRAP, "note_rows": {69: "E"}},
+    "Paycheck Budget": {"w": BUD_W, "banner": ("F", 46, 22),
+                        "sub": ("A2", "M"), "bands": BUD_BANDS,
+                        "wrap_rows": BUD_WRAP},
+    "Example": {"w": BUD_W, "banner": ("F", 46, 22), "sub": ("A2", "M"),
+                "bands": BUD_BANDS, "wrap_rows": BUD_WRAP},
+    "🪴 Transactions Log": {"w": {"A": 14, "B": 24, "C": 14, "D": 14, "E": 40},
+                            "banner": ("E", 46, 22), "sub": ("A2", "E")},
+    "🏦 Bank Import": {"w": {"A": 15, "B": 34, "C": 14, "D": 22, "E": 14, "F": 16,
+                            "G": 12, "H": 11, "I": 28, "J": 3, "K": 16, "L": 22},
+                      "banner": ("I", 46, 22), "sub": ("A2", "I"),
+                      "wrap_rows": [(5, 26, "A", "I")], "note_rows": {3: "I"}},
+    "🗓️ Bill Calendar": {"w": {"A": 3, "B": 14, "C": 14, "D": 14, "E": 14,
+                               "F": 14, "G": 14, "H": 14},
+                         "banner": ("H", 46, 22), "sub": ("A2", "H"),
+                         "hide": ["I", "J"]},
+    "Savings & Debt Goal Tracker": {
+        "w": {"A": 26, "B": 16, "C": 14, "D": 16, "E": 12, "F": 14, "G": 14},
+        "banner": ("G", 46, 22), "sub": ("A2", "G"),
+        "bands": [("A4", "G", SAGE), ("A15", "G", LAV), ("A27", "G", SKY)],
+        "wrap_rows": [(5, 30, "A", "G"), (16, 30, "A", "G"), (30, 24, "A", "D")],
+        "hide": ["I", "J"], "note_rows": {28: "G"}},
+    "Subscription Tracker": {
+        "w": {"A": 28, "B": 30, "C": 18, "D": 12, "E": 11, "F": 12, "G": 14,
+              "H": 14, "I": 28, "K": 22, "L": 12},
+        "banner": ("I", 46, 22), "sub": ("A2", "I"),
+        "wrap_rows": [(6, 30, "A", "I")]},
+    "🌼 Habit Tracker": {"w": {"A": 24, "B": 16, "AH": 14},
+                        "banner": ("AG", 46, 22), "sub": ("A2", "AG")},
+    "Settings": {"banner": ("A", 44, 20), "title": "Settings",
+                 "sub": None, "note_rows": {1: "T"}},
+}
+
+
+def polish(wb):
+    # rebrand the legacy product name in Welcome copy
+    if "🌸 Welcome" in wb.sheetnames:
+        w = wb["🌸 Welcome"]
+        if w["A2"].value and "simple, automatic" in str(w["A2"].value):
+            w["A2"] = ("An ADHD-friendly budget and debt tracker. Shame-free, "
+                       "visual, and built to feel calm, not overwhelming.")
+
+    for disp, cfg in POLISH.items():
+        if disp not in wb.sheetnames:
+            continue
+        ws = wb[disp]
+        ws.sheet_view.showGridLines = False
+        widths = {}
+        for k, v in cfg.get("w", {}).items():
+            ws.column_dimensions[k].width = v
+            widths[k] = v
+        # fill remaining widths from existing for span math
+        for col, cd in ws.column_dimensions.items():
+            widths.setdefault(col, cd.width or 8.43)
+
+        if "banner" in cfg:
+            span, h, size = cfg["banner"]
+            _rebanner(ws, span, cfg.get("title"), height=h, size=size)
+
+        if cfg.get("sub"):
+            cell, span = cfg["sub"]
+            if ws[cell].value:
+                _restyle_subtitle(ws, cell, span, widths)
+
+        for col in cfg.get("hide", []):
+            ws.column_dimensions[col].hidden = True
+
+        for cell, span, fill in cfg.get("bands", []):
+            if ws[cell].value is not None:
+                _band(ws, cell, span, widths, fill=fill)
+
+        for row, h, a, b in cfg.get("wrap_rows", []):
+            for ci in range(column_index_from_string(a), column_index_from_string(b) + 1):
+                c = ws.cell(row, ci)
+                if c.value is not None:
+                    al = c.alignment
+                    c.alignment = Alignment(
+                        horizontal=al.horizontal if al and al.horizontal else "center",
+                        vertical="center", wrap_text=True,
+                        indent=al.indent if al else 0)
+            ws.row_dimensions[row].height = h
+
+        for r, span in cfg.get("note_rows", {}).items():
+            c = ws.cell(r, 1)
+            if c.value:
+                col0 = "A"
+                rng = f"A{r}:{span}{r}"
+                if not any(m.min_row == r and m.max_row == r
+                           for m in ws.merged_cells.ranges):
+                    try:
+                        ws.merge_cells(rng)
+                    except Exception:
+                        pass
+                c.alignment = Alignment(horizontal="left", vertical="center",
+                                        indent=1, wrap_text=True)
+                if not isinstance(c.value, str) or not c.value.startswith("="):
+                    ws.row_dimensions[r].height = _fit_h(
+                        c.value, _spanw(widths, col0, span))
+
+        # document reflow: wrap + fit every text row in column A
+        if cfg.get("doc"):
+            wA = cfg["w"]["A"]
+            for r in range(3, ws.max_row + 1):
+                c = ws.cell(r, 1)
+                if c.value is None or (isinstance(c.value, str) and
+                                       c.value.startswith("=")):
+                    continue
+                al = c.alignment
+                c.alignment = Alignment(horizontal="left", vertical="center",
+                                        indent=1, wrap_text=True)
+                # keep any existing section-band fill; just fit the height
+                ws.row_dimensions[r].height = _fit_h(c.value, wA)
 
 
 # ------------------------------------------------------------------ finalize ---
